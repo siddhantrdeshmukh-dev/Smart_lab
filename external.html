@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo & Pilot Request - SmartLab</title>
+    
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    <!-- Integrated CSS -->
+    <style>
+        /* ===============================
+           ROOT THEME VARIABLES (from index.html)
+           =============================== */
+        :root {
+            --bg-900: #071021;
+            --bg-800: #0b2540;
+            --surface: #0f2b48;
+            --muted: #98a6b3;
+            --text: #eaf3ff;
+            --accent-blue: #4f8cff;
+            --accent-purple: #8b5cf6;
+            --accent-green: #34d399;
+            --accent-red: #ff6b6b;
+            --glass: rgba(255, 255, 255, 0.03);
+            --radius: 14px;
+            --ease: cubic-bezier(.2, .9, .3, 1);
+            --container: 1180px;
+        }
+
+        html.light {
+            --bg-900: #f7fbff;
+            --bg-800: #eef6ff;
+            --surface: #ffffff;
+            --muted: #6b7280;
+            --text: #0b2340;
+            --glass: rgba(0, 0, 0, 0.04);
+        }
+
+        /* ===============================
+           GLOBAL & LAYOUT STYLES
+           =============================== */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Roboto", sans-serif;
+            background: var(--bg-800);
+            color: var(--text);
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===============================
+           HEADER/NAVBAR
+           =============================== */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1200;
+            backdrop-filter: blur(6px);
+            background: linear-gradient(180deg, rgba(8, 12, 20, 0.6), rgba(8, 12, 20, 0.35));
+            border-bottom: 1px solid var(--glass);
+        }
+
+        html.light header {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .navbar {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: #fff;
+            font-weight: 800;
+            font-family: "Poppins";
+        }
+        
+        main {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        /* ===============================
+           FORM & CONTENT STYLING
+           =============================== */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .info-column h1 {
+            font-family: "Poppins", sans-serif;
+            font-size: 42px;
+            margin-bottom: 16px;
+        }
+
+        .info-column .lead {
+            font-size: 18px;
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+
+        .feature-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--glass);
+            margin-bottom: 16px;
+            transition: transform 0.2s var(--ease);
+        }
+        
+        .feature-box:hover {
+            transform: translateY(-4px);
+        }
+
+        .feature-box .icon {
+            font-size: 24px;
+            min-width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            color: #fff;
+        }
+
+        .feature-box h5 {
+            font-family: "Poppins", sans-serif;
+            margin: 0 0 4px 0;
+        }
+        
+        .feature-box p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 24px 32px;
+            border-radius: var(--radius);
+            border: 1px solid var(--glass);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--glass);
+            background: var(--bg-900);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.2);
+        }
+
+        .btn {
+            border: 0;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: transform 160ms var(--ease), box-shadow 160ms var(--ease);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            color: #fff;
+        }
+        
+        .system-message {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none; /* Hidden by default */
+            text-align: left;
+        }
+        .system-message.success {
+            background-color: rgba(52, 211, 153, 0.1);
+            color: var(--accent-green);
+            display: block;
+        }
+        .system-message.error {
+            background-color: rgba(255, 107, 107, 0.1);
+            color: var(--accent-red);
+            display: block;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .info-column {
+                text-align: center;
+            }
+            .feature-box {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container navbar">
+            <a href="index.html" class="brand">
+                <div class="logo">SL</div>
+                <div>
+                    <div style="font-weight:700;">Smart Lab System</div>
+                    <div style="font-size:12px; color: var(--muted);">Demo & Pilot Request</div>
+                </div>
+            </a>
+            <a href="index.html" style="font-weight: 600;">Back to Home</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="content-grid">
+                <!-- Left Column: Information -->
+                <div class="info-column">
+                    <h1>Partner with SmartLab</h1>
+                    <p class="lead">
+                        Discover how our unified platform can revolutionize laboratory operations. Schedule a personalized demo or inquire about our pilot program to experience the future of lab management firsthand.
+                    </p>
+                    <div class="features-list">
+                        <div class="feature-box">
+                            <div class="icon" style="background: var(--accent-blue);"><i class="fas fa-cogs"></i></div>
+                            <div>
+                                <h5>Streamline Operations</h5>
+                                <p>Automate scheduling, inventory, and reporting to reduce manual work.</p>
+                            </div>
+                        </div>
+                        <div class="feature-box">
+                            <div class="icon" style="background: var(--accent-green);"><i class="fas fa-chart-line"></i></div>
+                            <div>
+                                <h5>Gain Data-Driven Insights</h5>
+                                <p>Utilize real-time analytics for better resource allocation and decision-making.</p>
+                            </div>
+                        </div>
+                        <div class="feature-box">
+                            <div class="icon" style="background: var(--accent-purple);"><i class="fas fa-handshake"></i></div>
+                            <div>
+                                <h5>Enhance Collaboration</h5>
+                                <p>Improve communication between students, faculty, and staff with a centralized system.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Form -->
+                <div class="form-column">
+                    <div class="card">
+                        <h3 style="font-family: 'Poppins', sans-serif; text-align: center; margin-bottom: 24px;">Request Information</h3>
+                        <div id="form-feedback" class="system-message"></div>
+                        <form id="request-form" novalidate>
+                            <div class="form-group">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" class="form-control" id="fullName" placeholder="e.g., Dr. Jane Doe" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="company">Company / Institution</label>
+                                <input type="text" class="form-control" id="company" placeholder="e.g., Global Tech University" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Work Email</label>
+                                <input type="email" class="form-control" id="email" placeholder="e.g., jane.doe@university.edu" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="requestType">I'm interested in...</label>
+                                <select class="form-control" id="requestType" required>
+                                    <option value="" selected disabled>Select an option</option>
+                                    <option value="demo">Scheduling a Demo</option>
+                                    <option value="pilot">Requesting a Pilot Program</option>
+                                    <option value="other">Other Inquiry</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Message (Optional)</label>
+                                <textarea class="form-control" id="message" rows="3" placeholder="Tell us about your specific needs..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Request</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Integrated JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const requestForm = document.getElementById('request-form');
+            const feedbackDiv = document.getElementById('form-feedback');
+
+            requestForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                
+                feedbackDiv.innerHTML = '';
+                feedbackDiv.className = 'system-message';
+
+                const fullName = document.getElementById('fullName').value.trim();
+                const company = document.getElementById('company').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const requestType = document.getElementById('requestType').value;
+
+                if (!fullName || !company || !email || !requestType) {
+                    feedbackDiv.className = 'system-message error';
+                    feedbackDiv.textContent = 'Please fill out all required fields.';
+                    return;
+                }
+                
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                     feedbackDiv.className = 'system-message error';
+                     feedbackDiv.textContent = 'Please enter a valid email address.';
+                     return;
+                }
+
+                const formData = {
+                    name: fullName,
+                    company: company,
+                    email: email,
+                    requestType: requestType,
+                    message: document.getElementById('message').value.trim(),
+                    submittedAt: new Date().toISOString()
+                };
+
+                console.log("Form Data Submitted:", formData);
+                
+                feedbackDiv.className = 'system-message success';
+                feedbackDiv.innerHTML = '<p><strong>Thank you!</strong> Your request has been submitted. We will contact you shortly.</p>';
+                
+                requestForm.reset();
+            });
+        });
+    </script>
+</body>
+</html>

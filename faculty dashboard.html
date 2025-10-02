@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Lab — Advanced Faculty Dashboard</title>
+
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <meta name="theme-color" content="#0b2340">
+  <style>
+/* =========================
+   THEME, RESET & UTILITIES
+   ========================= */
+:root{
+  --bg-900:#071021; --bg-800:#0b2540; --surface: #0f2b48; --muted:#98a6b3; --text:#eaf3ff;
+  --accent-blue:#4f8cff; --accent-purple:#8b5cf6; --accent-green:#34d399; --accent-red:#ff6b6b; --accent-yellow:#ffd166;
+  --glass: rgba(255,255,255,0.03); --radius:12px; --container:1400px; --ease: cubic-bezier(.2,.9,.3,1);
+}
+html.light{
+  --bg-900:#f7fbff; --bg-800:#eef6ff; --surface:#ffffff; --muted:#6b7280; --text:#0b2340; --glass: rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box}
+body{ margin:0; font-family:"Roboto",sans-serif; background:var(--bg-800); color:var(--text); line-height:1.45; }
+.container{ max-width:var(--container); margin:0 auto; padding:0 20px; }
+.kv{ color:var(--muted); font-size:13px; }
+.hidden{ display:none!important; }
+.fade-in{ opacity:0; transform:translateY(12px); transition: all 520ms var(--ease); }
+.fade-in.show{ opacity:1; transform:none }
+
+/* =========================
+   LAYOUT & HEADER
+   ========================= */
+.header{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; position:sticky; top:0; z-index:1200; backdrop-filter:blur(6px); background:linear-gradient(180deg,rgba(8,12,20,0.6),rgba(8,12,20,0.35)); border-bottom:1px solid var(--glass); }
+html.light .header{ background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9)); border-bottom:1px solid rgba(0,0,0,0.06); }
+.brand{ display:flex; gap:12px; align-items:center; }
+.logo{ width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-green),var(--accent-blue)); color:#fff; font-weight:800; font-family:"Poppins"; }
+.dashboard-wrap{ display:grid; grid-template-columns:260px 1fr; gap:20px; padding:20px 0; }
+.sidebar{ position:sticky; top:84px; height:calc(100vh - 120px); padding:18px; border-radius:var(--radius); background:var(--surface); border:1px solid var(--glass); box-shadow:0 12px 36px rgba(0,0,0,0.12); display:flex; flex-direction:column; gap:12px; }
+.content{ padding:0; }
+
+/* =========================
+   SHARED COMPONENTS
+   ========================= */
+.btn{ border:0; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
+.btn-primary{ background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; }
+.btn-ghost{ background:transparent; border:1px solid var(--glass); color:var(--text); }
+.card{ background:var(--surface); padding:18px; border-radius:var(--radius); border:1px solid var(--glass); box-shadow:0 12px 36px rgba(0,0,0,0.08); }
+.tab-btn{ display:flex; gap:12px; align-items:center; padding:12px; border-radius:10px; font-weight:700; cursor:pointer; background:transparent; border:0; color:var(--text); width:100%; text-align:left; }
+.tab-btn[aria-selected="true"]{ background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; }
+.data-table{ width:100%; border-collapse:collapse; margin-top:12px; }
+.data-table th, .data-table td{ padding:12px; text-align:left; border-bottom:1px solid var(--glass); }
+.data-table th{ font-size:13px; color:var(--muted); }
+.status-badge{ padding:4px 8px; border-radius:8px; font-size:12px; font-weight:700; }
+.status-graded{ background:rgba(52,211,153,0.1); color:var(--accent-green); }
+.status-pending{ background:rgba(255,209,102,0.1); color:var(--accent-yellow); }
+.form-control{ width:100%; padding:10px; border-radius:8px; border:1px solid var(--glass); background:var(--bg-900); color:var(--text); font-family:inherit; }
+
+/* =========================
+   MODAL DIALOG
+   ========================= */
+.modal{ position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:2000; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 220ms var(--ease); }
+.modal.show{ opacity:1; pointer-events:auto; }
+.modal-content{ background:var(--bg-800); padding:24px; border-radius:var(--radius); width:100%; max-width:560px; box-shadow:0 20px 60px rgba(0,0,0,0.2); transform:scale(0.95); transition:transform 220ms var(--ease); }
+.modal.show .modal-content{ transform:scale(1); }
+.modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.modal-header h3{ margin:0; font-family:"Poppins"; }
+
+/* =========================
+   SPECIFIC PAGE STYLES
+   ========================= */
+/* Attendance Tracker */
+.attendance-grid{ display:grid; grid-template-columns:1fr 320px; gap:16px; }
+.student-list{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; max-height: 400px; overflow-y: auto; padding-right: 10px;}
+.student-card{ padding:12px; border-radius:10px; border:1px solid var(--glass); text-align:center; cursor:pointer; transition: all 150ms ease-out; }
+.student-card.status-present{ background:rgba(52,211,153,0.15); border-color:var(--accent-green); }
+.student-card.status-absent{ background:rgba(255,107,107,0.15); border-color:var(--accent-red); }
+.student-card.status-late{ background:rgba(255,209,102,0.15); border-color:var(--accent-yellow); }
+
+/* Calendar */
+.calendar-grid{ display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; }
+.calendar-day{ padding:8px; border-radius:8px; min-height:80px; background:var(--bg-900); transition:background 150ms ease; }
+.calendar-day.other-month{ opacity:0.4; }
+.calendar-day .day-number{ text-align:right; font-weight:700; }
+.calendar-event{ font-size:11px; padding:3px 6px; border-radius:6px; background:var(--accent-blue); color:white; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Student Progress */
+.progress-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+
+/* Settings */
+.setting-group{ margin-top:16px; }
+.checkbox-group{ display:flex; flex-direction:column; gap:8px; }
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media(max-width:1200px){
+  .attendance-grid, .progress-grid{ grid-template-columns:1fr; }
+}
+@media(max-width:980px){
+  .dashboard-wrap{ grid-template-columns:1fr; }
+  .sidebar{ position:relative; top:0; height:auto; flex-direction:row; overflow-x:auto; }
+  .tab-btn{ flex-direction:column; gap:4px; font-size:12px; }
+}
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header container">
+    <div class="brand">
+      <div class="logo">SL</div>
+      <div>
+        <div style="font-weight:700;">Faculty Dashboard</div>
+        <div class="kv">Smart Laboratory System</div>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-weight:800">Dr. Priya Sharma</div>
+      <div class="kv">Professor, ECE</div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="container dashboard-wrap">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <button class="tab-btn" data-tab="overview" aria-selected="true"><i class="fa-solid fa-chart-pie"></i> Overview</button>
+      <button class="tab-btn" data-tab="attendance"><i class="fa-solid fa-user-check"></i> Attendance</button>
+      <button class="tab-btn" data-tab="reports"><i class="fa-solid fa-file-signature"></i> Reports</button>
+      <button class="tab-btn" data-tab="progress"><i class="fa-solid fa-chart-line"></i> Student Progress</button>
+      <button class="tab-btn" data-tab="assignments"><i class="fa-solid fa-microchip"></i> Assignments</button>
+      <button class="tab-btn" data-tab="schedule"><i class="fa-solid fa-calendar-alt"></i> Schedule</button>
+      <div style="margin-top:auto"></div>
+      <button class="tab-btn" data-tab="settings"><i class="fa-solid fa-cog"></i> Settings</button>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <section class="content">
+      <div id="tabContainer">
+
+        <!-- Overview -->
+        <div class="tab-panel fade-in show" id="panel-overview">
+          <h2 style="font-family:'Poppins'; margin-top:0;">Overview</h2>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
+            <div class="card"><div class="kv">Pending Reports</div><div id="stat-pending-reports" style="font-size:28px; font-weight:800;">-</div></div>
+            <div class="card"><div class="kv">Active Lab Session</div><div id="stat-active-session" style="font-size:28px; font-weight:800;">-</div></div>
+            <div class="card"><div class="kv">Average Class Attendance</div><div id="stat-avg-attendance" style="font-size:28px; font-weight:800;">-</div></div>
+          </div>
+        </div>
+
+        <!-- Live Attendance Tracker -->
+        <div class="tab-panel fade-in hidden" id="panel-attendance">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-family:'Poppins'; margin-top:0;">Live Attendance Tracker</h2>
+            <div>
+              <label for="class-selector" class="kv">Select Class: </label>
+              <select id="class-selector" class="form-control" style="width:auto; display:inline-block;"></select>
+            </div>
+          </div>
+          <div class="attendance-grid">
+            <div class="card">
+              <h3 style="margin-top:0;">Student Roster</h3>
+              <div id="student-list" class="student-list"></div>
+            </div>
+            <div class="card">
+              <h3 style="margin-top:0;">Attendance Summary</h3>
+              <canvas id="attendance-chart"></canvas>
+              <button class="btn btn-primary" style="width:100%; margin-top:16px;" onclick="submitAttendance()">Submit Attendance</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Review -->
+        <div class="tab-panel fade-in hidden" id="panel-reports">
+          <h2 style="font-family:'Poppins'; margin-top:0;">Review Lab Reports</h2>
+          <div class="card">
+            <table class="data-table">
+              <thead><tr><th>Student</th><th>Report Title</th><th>Submitted On</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="reports-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Student Progress -->
+        <div class="tab-panel fade-in hidden" id="panel-progress">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-family:'Poppins'; margin-top:0;">Student Progress Tracker</h2>
+            <div>
+              <label for="student-progress-selector" class="kv">Select Student: </label>
+              <select id="student-progress-selector" class="form-control" style="width:auto; display:inline-block;"></select>
+            </div>
+          </div>
+          <div id="student-progress-view" class="hidden">
+            <div class="progress-grid" style="margin-top:16px;">
+              <div class="card">
+                <div class="kv">Overall Attendance</div>
+                <div id="progress-attendance" style="font-size:28px; font-weight:800;">-</div>
+              </div>
+              <div class="card">
+                <div class="kv">Average Grade</div>
+                <div id="progress-avg-grade" style="font-size:28px; font-weight:800;">-</div>
+              </div>
+              <div class="card">
+                <div class="kv">Assigned Equipment</div>
+                <div id="progress-equipment" style="font-size:18px; font-weight:800;">-</div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:16px;">
+              <h3 style="margin-top:0;">Grade Trend</h3>
+              <canvas id="grade-trend-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Equipment Assignments -->
+        <div class="tab-panel fade-in hidden" id="panel-assignments">
+            <h2 style="font-family:'Poppins'; margin-top:0;">Automated Equipment Assignments</h2>
+            <div class="card">
+                <p class="kv">Read-only view of equipment assigned to students for the current lab session.</p>
+                <table class="data-table">
+                    <thead><tr><th>Equipment ID</th><th>Equipment Name</th><th>Assigned To Student</th><th>Student ID</th></tr></thead>
+                    <tbody id="assignments-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="tab-panel fade-in hidden" id="panel-schedule">
+            <h2 style="font-family:'Poppins'; margin-top:0;">Lab Schedule Calendar</h2>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <button id="prev-month-btn" class="btn btn-ghost"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3 id="calendar-month-year" style="margin:0; font-family:'Poppins';"></h3>
+                    <button id="next-month-btn" class="btn btn-ghost"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="tab-panel fade-in hidden" id="panel-settings">
+          <h2 style="font-family:'Poppins'; margin-top:0;">Settings</h2>
+          <div class="card">
+            <div class="setting-group">
+                <h3>Theme</h3>
+                <button id="themeToggle" class="btn btn-ghost">Toggle Light/Dark Mode</button>
+            </div>
+            <div class="setting-group">
+                <h3>Notification Preferences</h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" checked> New Report Submitted</label>
+                    <label><input type="checkbox" checked> Schedule Changes</label>
+                    <label><input type="checkbox"> Low Attendance Alert</label>
+                </div>
+            </div>
+            <div class="setting-group">
+                <h3>Default View</h3>
+                <select class="form-control">
+                    <option>Overview</option>
+                    <option>Attendance</option>
+                    <option>Reports</option>
+                </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Grade Report Modal -->
+  <div id="gradeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="gradeModalTitle">Grade Report</h3>
+            <button class="btn btn-ghost" onclick="closeModal('gradeModal')">&times;</button>
+        </div>
+        <form id="gradeForm" onsubmit="handleGradeSubmit(event)">
+            <input type="hidden" id="gradeReportId">
+            <div>
+                <label for="gradeScore">Score (0-100)</label>
+                <input type="number" id="gradeScore" class="form-control" required min="0" max="100">
+            </div>
+            <div style="margin-top:12px;">
+                <label for="gradeFeedback">Feedback</label>
+                <textarea id="gradeFeedback" class="form-control" rows="4"></textarea>
+            </div>
+            <div style="text-align:right; margin-top:20px;">
+                <button type="submit" class="btn btn-primary">Submit Grade</button>
+            </div>
+        </form>
+    </div>
+  </div>
+
+<script>
+(function() {
+    'use strict';
+    /* =========================
+       MOCK DATA
+       ========================= */
+    const students = [
+        { id: 'S001', name: 'Aarav Sharma' }, { id: 'S002', name: 'Diya Patel' },
+        { id: 'S003', name: 'Rohan Mehta' }, { id: 'S004', name: 'Isha Singh' },
+        { id: 'S005', name: 'Kabir Gupta' }, { id: 'S006', name: 'Ananya Reddy' },
+        { id: 'S007', name: 'Vivaan Joshi' }, { id: 'S008', name: 'Mira Nair' },
+        { id: 'S009', name: 'Arjun Kumar' }, { id: 'S010', name: 'Saanvi Desai' },
+        { id: 'S011', name: 'Advik Iyer' }, { id: 'S012', name: 'Kyra Menon' },
+        { id: 'S013', name: 'Zain Ali' }, { id: 'S014', name: 'Pari Verma' },
+        { id: 'S015', name: 'Reyansh Pillai' }, { id: 'S016', name: 'Aadhya Rao' },
+        { id: 'S017', name: 'Ishaan Bhatt' }, { id: 'S018', name: 'Myra Chauhan' },
+        { id: 'S019', name: 'Vihaan Malhotra' }, { id: 'S020', name: 'Anika Shah' },
+        { id: 'S021', name: 'Dev Saxena' }, { id: 'S022', name: 'Zara Khan' },
+        { id: 'S023', name: 'Aryan Choudhary' }, { id: 'S024', name: 'Eva Ghosh' },
+        { id: 'S025', name: 'Neel Bajaj' }, { id: 'S026', name: 'Kiara Ahuja' },
+        { id: 'S027', name: 'Shaurya Pandey' }, { id: 'S028', name: 'Navya Dubey' },
+        { id: 'S029', name: 'Ayaan Das' }, { id: 'S030', name: 'Riya Sengupta' },
+        { id: 'S031', name: 'Krish Trivedi' }, { id: 'S032', name: 'Samaira Jha' },
+        { id: 'S033', name: 'Arnav Singh' }, { id: 'S034', name: 'Aditi Sharma' },
+        { id: 'S035', name: 'Yash Gupta' }, { id: 'S036', name: 'Anvi Patel' },
+        { id: 'S037', name: 'Dhruv Kumar' }, { id: 'S038', name: 'Priya Mehta' },
+        { id: 'S039', name: 'Sai Reddy' }, { id: 'S040', name: 'Ishita Joshi' },
+        { id: 'S041', name: 'Mohammad Ali' }, { id: 'S042', name: 'Siya Verma' },
+        { id: 'S043', name: 'Rudra Nair' }, { id: 'S044', name: 'Khushi Rao' },
+        { id: 'S045', name: 'Atharv Bhatt' }, { id: 'S046', name: 'Jiya Chauhan' },
+        { id: 'S047', name: 'Aarush Malhotra' }, { id: 'S048', name: 'Avni Shah' },
+        { id: 'S049', name: 'Laksh Saxena' }, { id: 'S050', name: 'Fatima Khan' },
+        { id: 'S051', name: 'Kian Choudhary' }, { id: 'S052', name: 'Aisha Ghosh' },
+        { id: 'S053', name: 'Veer Bajaj' }, { id: 'S054', name: 'Suhana Ahuja' },
+        { id: 'S055', name: 'Yuvan Pandey' }, { id: 'S056', name: 'Amaira Dubey' },
+        { id: 'S057', 'name': 'Kabir Das' }, { id: 'S058', 'name': 'Inaya Sengupta' },
+        { id: 'S059', 'name': 'Arin Trivedi' }, { id: 'S060', 'name': 'Zoya Jha' },
+        { id: 'S061', 'name': 'Rehan Singh' }, { id: 'S062', 'name': 'Tara Sharma' },
+        { id: 'S063', 'name': 'Param Gupta' }, { id: 'S064', 'name': 'Nyra Patel' }
+    ];
+
+    const classes = [
+        { id: 'C101', name: 'Image Processing Lab', studentIds: students.slice(0, 8).map(s => s.id) },
+        { id: 'C102', name: 'DBMS Lab', studentIds: students.slice(8, 16).map(s => s.id) },
+        { id: 'C103', name: 'Big Data Lab', studentIds: students.slice(16, 24).map(s => s.id) },
+        { id: 'C104', name: 'Instrumentation Lab', studentIds: students.slice(24, 32).map(s => s.id) },
+        { id: 'C105', name: 'Personal Finance', studentIds: students.slice(32, 40).map(s => s.id) },
+        { id: 'C106', name: 'Cybersecurity Lab', studentIds: students.slice(40, 48).map(s => s.id) },
+        { id: 'C107', name: 'Machine Vision Lab', studentIds: students.slice(48, 56).map(s => s.id) },
+        { id: 'C108', name: 'Advanced DBMS', studentIds: students.slice(56, 64).map(s => s.id) }
+    ];
+
+    let reports = [
+        { id: 'R01', studentId: 'S001', title: 'Lab 1: Edge Detection', submittedOn: '2025-08-10', status: 'Pending', grade: null, feedback: null },
+        { id: 'R02', studentId: 'S009', title: 'Lab 1: SQL Queries', submittedOn: '2025-08-10', status: 'Pending', grade: null, feedback: null },
+        { id: 'R03', studentId: 'S017', title: 'Lab 1: Hadoop Setup', submittedOn: '2025-08-11', status: 'Graded', grade: 92, feedback: 'Excellent work.' },
+        { id: 'R04', studentId: 'S025', title: 'Lab 1: Transducer Calibration', submittedOn: '2025-08-11', status: 'Pending', grade: null, feedback: null },
+        { id: 'R05', studentId: 'S033', title: 'Case Study 1: Budgeting', submittedOn: '2025-08-12', status: 'Graded', grade: 88, feedback: 'Good analysis.' },
+        { id: 'R06', studentId: 'S041', title: 'Lab 1: Network Sniffing', submittedOn: '2025-08-13', status: 'Pending', grade: null, feedback: null },
+        { id: 'R07', studentId: 'S049', title: 'Lab 1: Object Recognition', submittedOn: '2025-09-02', status: 'Pending', grade: null, feedback: null },
+        { id: 'R08', studentId: 'S057', title: 'Lab 1: Advanced SQL', submittedOn: '2025-09-03', status: 'Graded', grade: 95, feedback: 'Perfect joins.' },
+    ];
+
+    const equipment = [
+        { id: 'CAM-01', name: 'High-Res Camera' }, { id: 'CAM-02', name: 'High-Res Camera' }, { id: 'CAM-03', name: 'Stereo Camera' }, { id: 'CAM-04', name: 'Thermal Camera' },
+        { id: 'SVR-01', name: 'Database Server' }, { id: 'SVR-02', name: 'Database Server' }, { id: 'SVR-03', name: 'PostgreSQL Server' }, { id: 'SVR-04', name: 'MongoDB Server' },
+        { id: 'CLUS-01', name: 'Hadoop Cluster Node' }, { id: 'CLUS-02', name: 'Hadoop Cluster Node' }, { id: 'CLUS-03', name: 'Spark Cluster Node' }, { id: 'CLUS-04', name: 'Spark Cluster Node' },
+        { id: 'DAQ-01', name: 'Data Acquisition Card' }, { id: 'DAQ-02', name: 'Data Acquisition Card' }, { id: 'SEN-01', name: 'Pressure Sensor' }, { id: 'SEN-02', name: 'Temp Sensor' },
+        { id: 'VM-01', name: 'Cybersecurity VM' }, { id: 'VM-02', name: 'Cybersecurity VM' }, { id: 'FW-01', name: 'Firewall Appliance' }, { id: 'FW-02', name: 'Firewall Appliance' },
+        { id: 'OSC-001', name: 'Oscilloscope' }, { id: 'PSU-001', name: 'Power Supply' },
+        { id: 'FGEN-001', name: 'Function Generator' }, { id: 'DMM-001', name: 'Multimeter' },
+    ];
+
+    let equipmentAssignments = [];
+    let attendanceData = {}; // { classId: { studentId: 'status' } }
+    let schedule = [
+        { date: '2025-08-12', time: '10:00', class: 'Image Processing Lab', topic: 'Intro to OpenCV' },
+        { date: '2025-08-12', time: '14:00', class: 'DBMS Lab', topic: 'Normalization' },
+        { date: '2025-08-14', time: '11:00', class: 'Cybersecurity Lab', topic: 'Wireshark Basics' },
+        { date: '2025-08-19', time: '09:00', class: 'Big Data Lab', topic: 'MapReduce Concepts' },
+        { date: '2025-09-05', time: '10:00', class: 'Instrumentation Lab', topic: 'Sensor Interfacing' },
+        { date: '2025-09-08', time: '13:00', class: 'Machine Vision Lab', topic: 'Feature Extraction' },
+    ];
+    
+    // Chart instances
+    let attendanceChart = null;
+    let gradeTrendChart = null;
+    let calendarDate = new Date(2025, 7, 1); // August 2025
+
+    /* =========================
+       INITIALIZATION & THEME
+       ========================= */
+    function init() {
+        setupTheme();
+        populateSelectors();
+        renderAll();
+        const initialClassId = classes[0].id;
+        simulateEquipmentAssignment(initialClassId);
+        renderAssignments();
+    }
+
+    function setupTheme() {
+        const themeToggle = document.getElementById('themeToggle');
+        const applyTheme = (theme) => {
+            if (theme === 'light') document.documentElement.classList.add('light');
+            else document.documentElement.classList.remove('light');
+        };
+        applyTheme(localStorage.getItem('smartlab-theme'));
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.classList.toggle('light');
+            localStorage.setItem('smartlab-theme', isLight ? 'light' : 'dark');
+        });
+    }
+
+    /* =========================
+       RENDERING FUNCTIONS
+       ========================= */
+    function renderAll() {
+        renderOverview();
+        renderAttendance();
+        renderReports();
+        renderStudentProgressSelector();
+        renderCalendar();
+        renderAssignments();
+    }
+
+    function renderOverview() {
+        document.getElementById('stat-pending-reports').textContent = reports.filter(r => r.status === 'Pending').length;
+        document.getElementById('stat-active-session').textContent = classes[0].name;
+        document.getElementById('stat-avg-attendance').textContent = '95%'; // Mock value
+    }
+
+    function renderAttendance() {
+        const classId = document.getElementById('class-selector').value;
+        const studentList = document.getElementById('student-list');
+        studentList.innerHTML = '';
+        if (!attendanceData[classId]) attendanceData[classId] = {};
+        
+        const currentClass = classes.find(c => c.id === classId);
+        if (!currentClass) return;
+
+        currentClass.studentIds.forEach(studentId => {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            const status = attendanceData[classId][studentId] || 'present';
+            const card = document.createElement('div');
+            card.className = `student-card status-${status}`;
+            card.dataset.studentId = studentId;
+            card.innerHTML = `<div class="kv">${student.id}</div><div style="font-weight:700;">${student.name}</div>`;
+            card.addEventListener('click', () => toggleAttendance(classId, studentId));
+            studentList.appendChild(card);
+        });
+        renderAttendanceChart(classId);
+    }
+
+    function renderReports() {
+        const tbody = document.getElementById('reports-tbody');
+        tbody.innerHTML = '';
+        reports.forEach(report => {
+            const student = students.find(s => s.id === report.studentId);
+            if (!student) return;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${student.name}</td>
+                <td>${report.title}</td>
+                <td>${report.submittedOn}</td>
+                <td><span class="status-badge status-${report.status.toLowerCase()}">${report.status}</span></td>
+                <td>
+                    <button class="btn btn-ghost" onclick="alert('Viewing report ${report.id}')">View</button>
+                    ${report.status === 'Pending' ? `<button class="btn btn-primary" onclick="showGradeModal('${report.id}')">Grade</button>` : ''}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+    
+    function renderStudentProgress() {
+        const studentId = document.getElementById('student-progress-selector').value;
+        const view = document.getElementById('student-progress-view');
+        if (!studentId) {
+            view.classList.add('hidden');
+            return;
+        }
+        view.classList.remove('hidden');
+
+        const studentReports = reports.filter(r => r.studentId === studentId && r.status === 'Graded');
+        const avgGrade = studentReports.length ? (studentReports.reduce((sum, r) => sum + r.grade, 0) / studentReports.length).toFixed(1) : 'N/A';
+        const assignedEquip = equipmentAssignments.find(a => a.studentId === studentId);
+        
+        document.getElementById('progress-attendance').textContent = '98%'; // Mock
+        document.getElementById('progress-avg-grade').textContent = avgGrade;
+        document.getElementById('progress-equipment').textContent = assignedEquip ? `${assignedEquip.equipmentName} (${assignedEquip.equipmentId})` : 'None';
+        
+        renderGradeTrendChart(studentReports);
+    }
+    
+    function renderAssignments() {
+        const tbody = document.getElementById('assignments-tbody');
+        tbody.innerHTML = '';
+        equipmentAssignments.forEach(a => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${a.equipmentId}</td>
+                <td>${a.equipmentName}</td>
+                <td>${a.studentName}</td>
+                <td>${a.studentId}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+    
+    function renderCalendar() {
+        const grid = document.getElementById('calendar-grid');
+        const monthYearEl = document.getElementById('calendar-month-year');
+        grid.innerHTML = '';
+        
+        const month = calendarDate.getMonth();
+        const year = calendarDate.getFullYear();
+        monthYearEl.textContent = `${calendarDate.toLocaleString('default', { month: 'long' })} ${year}`;
+        
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+            grid.innerHTML += `<div class="calendar-day other-month"></div>`;
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            dayEl.innerHTML = `<div class="day-number">${day}</div>`;
+            
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const events = schedule.filter(s => s.date === dateStr);
+            
+            events.forEach(event => {
+                const eventEl = document.createElement('div');
+                eventEl.className = 'calendar-event';
+                eventEl.textContent = event.class;
+                dayEl.appendChild(eventEl);
+            });
+            grid.appendChild(dayEl);
+        }
+    }
+
+    /* =========================
+       CHART RENDERING
+       ========================= */
+    function renderAttendanceChart(classId) {
+        const ctx = document.getElementById('attendance-chart').getContext('2d');
+        const data = attendanceData[classId] || {};
+        const summary = { present: 0, absent: 0, late: 0 };
+        Object.values(data).forEach(status => {
+            summary[status]++;
+        });
+        
+        const currentClass = classes.find(c => c.id === classId);
+        if (!currentClass) return;
+        const totalStudents = currentClass.studentIds.length;
+        summary.present = totalStudents - summary.absent - summary.late;
+
+        if (attendanceChart) attendanceChart.destroy();
+        attendanceChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent', 'Late'],
+                datasets: [{
+                    data: [summary.present, summary.absent, summary.late],
+                    backgroundColor: ['#34d399', '#ff6b6b', '#ffd166'],
+                    borderColor: 'var(--surface)',
+                    borderWidth: 4
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: 'var(--text)' } } } }
+        });
+    }
+    
+    function renderGradeTrendChart(studentReports) {
+        const ctx = document.getElementById('grade-trend-chart').getContext('2d');
+        if (gradeTrendChart) gradeTrendChart.destroy();
+        gradeTrendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: studentReports.map(r => r.title),
+                datasets: [{
+                    label: 'Grade',
+                    data: studentReports.map(r => r.grade),
+                    borderColor: 'var(--accent-blue)',
+                    backgroundColor: 'rgba(79,140,255,0.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                scales: { 
+                    y: { min: 0, max: 100, ticks:{color:'var(--muted)'}, grid:{color:'var(--glass)'} },
+                    x: { ticks:{color:'var(--muted)'}, grid:{color:'var(--glass)'} }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    /* =========================
+       EVENT HANDLERS & LOGIC
+       ========================= */
+    function populateSelectors() {
+        const classSelector = document.getElementById('class-selector');
+        const studentSelector = document.getElementById('student-progress-selector');
+        classSelector.innerHTML = '';
+        studentSelector.innerHTML = '<option value="">Select a student...</option>';
+
+        classes.forEach(c => classSelector.add(new Option(c.name, c.id)));
+        students.forEach(s => studentSelector.add(new Option(s.name, s.id)));
+        
+        classSelector.addEventListener('change', () => {
+            simulateEquipmentAssignment(classSelector.value);
+            renderAttendance();
+            renderAssignments();
+        });
+        studentSelector.addEventListener('change', renderStudentProgress);
+        
+        document.getElementById('prev-month-btn').addEventListener('click', () => {
+            calendarDate.setMonth(calendarDate.getMonth() - 1);
+            renderCalendar();
+        });
+        document.getElementById('next-month-btn').addEventListener('click', () => {
+            calendarDate.setMonth(calendarDate.getMonth() + 1);
+            renderCalendar();
+        });
+    }
+
+    function toggleAttendance(classId, studentId) {
+        const currentStatus = attendanceData[classId][studentId] || 'present';
+        const statuses = ['present', 'absent', 'late'];
+        const nextIndex = (statuses.indexOf(currentStatus) + 1) % statuses.length;
+        attendanceData[classId][studentId] = statuses[nextIndex];
+        renderAttendance();
+    }
+    
+    function simulateEquipmentAssignment(classId) {
+        const currentClass = classes.find(c => c.id === classId);
+        if (!currentClass) return;
+        const availableEquipment = [...equipment];
+        equipmentAssignments = [];
+
+        currentClass.studentIds.forEach(studentId => {
+            if (availableEquipment.length > 0) {
+                const student = students.find(s => s.id === studentId);
+                const equip = availableEquipment.shift();
+                equipmentAssignments.push({
+                    equipmentId: equip.id,
+                    equipmentName: equip.name,
+                    studentId: student.id,
+                    studentName: student.name
+                });
+            }
+        });
+    }
+    
+    window.handleGradeSubmit = (event) => {
+        event.preventDefault();
+        const reportId = document.getElementById('gradeReportId').value;
+        const score = parseInt(document.getElementById('gradeScore').value);
+        const feedback = document.getElementById('gradeFeedback').value;
+        
+        const report = reports.find(r => r.id === reportId);
+        if(report) {
+            report.status = 'Graded';
+            report.grade = score;
+            report.feedback = feedback;
+        }
+        
+        closeModal('gradeModal');
+        renderReports();
+        renderStudentProgress();
+    };
+    
+    window.closeModal = (id) => document.getElementById(id).classList.remove('show');
+    window.showGradeModal = (reportId) => {
+        document.getElementById('gradeReportId').value = reportId;
+        document.getElementById('gradeForm').reset();
+        document.getElementById('gradeModal').classList.add('show');
+    };
+
+    /* =========================
+       TAB NAVIGATION
+       ========================= */
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
+        btn.setAttribute('aria-selected', 'true');
+        document.querySelectorAll('.tab-panel').forEach(p => {
+            if (p.id === `panel-${btn.dataset.tab}`) {
+                p.classList.remove('hidden');
+                setTimeout(() => p.classList.add('show'), 10);
+            } else {
+                p.classList.remove('show');
+                setTimeout(() => p.classList.add('hidden'), 200);
+            }
+        });
+    }));
+
+    // Initialize
+    init();
+})();
+</script>
+</body>
+</html>

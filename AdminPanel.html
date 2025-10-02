@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Lab — Admin Panel</title>
+
+  <!-- Google fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <meta name="theme-color" content="#0b2340">
+
+  <style>
+/* ========= THEME VARIABLES ========= */
+:root{
+  --bg-900:#071021;
+  --bg-800:#0b2540;
+  --panel: #0f2b48;
+  --muted: #98a6b3;
+  --text: #eaf3ff;
+  --accent-blue:#4f8cff;
+  --accent-purple:#8b5cf6;
+  --accent-green:#34d399;
+  --gold:#ffd166;
+  --glass: rgba(255,255,255,0.03);
+  --radius:12px;
+  --container:1180px;
+  --ease: cubic-bezier(.2,.9,.3,1);
+}
+html.light{
+  --bg-900:#f7fbff;
+  --bg-800:#eef6ff;
+  --panel:#ffffff;
+  --muted:#6b7280;
+  --text:#0b2340;
+  --glass: rgba(0,0,0,0.04);
+}
+
+/* ========= RESET & BASE ========= */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:"Roboto", system-ui, -apple-system, "Segoe UI", "Poppins", sans-serif;
+  background: linear-gradient(180deg,var(--bg-900), var(--bg-800));
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+}
+.container{ max-width:var(--container); margin:0 auto; padding:0 20px; }
+a{ color:inherit; text-decoration:none; }
+
+/* ========= NAVBAR ========= */
+header{
+  position:sticky; top:0; z-index:1200;
+  background: linear-gradient(180deg, rgba(8,12,20,0.6), rgba(8,12,20,0.35));
+  backdrop-filter: blur(6px);
+  border-bottom:1px solid rgba(255,255,255,0.03);
+}
+html.light header{
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+  border-bottom:1px solid rgba(0,0,0,0.06);
+}
+.navbar{ height:72px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.brand{ display:flex; gap:12px; align-items:center; }
+.logo{ width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple)); color:#fff; font-weight:800; font-family:"Poppins"; }
+.brand .meta{ font-weight:700; }
+.brand .sub{ color:var(--muted); font-size:12px; }
+
+/* nav links (left) */
+nav ul{ display:flex; gap:14px; list-style:none; margin:0; padding:0; align-items:center; }
+nav a.link{ padding:8px 10px; border-radius:8px; color:var(--text); font-weight:600; }
+nav a.link:hover{ color:var(--accent-blue); transform:translateY(-2px); transition:all 160ms var(--ease); }
+
+/* actions (right) */
+.actions{ display:flex; gap:10px; align-items:center; }
+.btn{ border:0; padding:9px 14px; border-radius:10px; cursor:pointer; font-weight:700; }
+.btn-primary{ background: linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; box-shadow:0 12px 36px rgba(79,140,255,0.12); }
+.btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--text); padding:8px 12px; }
+
+/* hamburger for small screens */
+.hamburger{ display:none; background:transparent; border:0; color:var(--text); font-size:20px }
+
+/* ========= LAYOUT ========= */
+.main-grid{
+  display:grid;
+  grid-template-columns: 260px 1fr; /* left sidebar + main content */
+  gap:20px;
+  padding:26px 20px;
+}
+@media (max-width:980px){
+  .main-grid{ grid-template-columns: 1fr; padding:12px 12px; }
+  .sidebar{ order:2 }
+}
+
+/* ========= SIDEBAR ========= */
+.sidebar{
+  position:sticky; top:84px; height:calc(100vh - 96px); padding:18px; border-radius:12px;
+  background: linear-gradient(180deg,var(--panel), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03);
+  box-shadow:0 12px 36px rgba(0,0,0,0.12);
+  display:flex; flex-direction:column; gap:12px;
+}
+.sidebar h4{ margin:0 0 8px 0; font-family:"Poppins"; font-size:14px }
+.side-list{ display:flex; flex-direction:column; gap:8px; margin-top:6px }
+.side-list a{ padding:10px 12px; border-radius:10px; color:var(--text); display:flex; align-items:center; gap:10px; font-weight:600; }
+.side-list a:hover{ background: rgba(255,255,255,0.02); transform: translateX(4px); transition: all 160ms var(--ease) }
+
+/* quick stat in sidebar */
+.side-stat{ display:flex; gap:10px; align-items:center; justify-content:space-between; padding:12px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.02) }
+
+/* ========= TOPBAR (page controls) ========= */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px;
+}
+.topbar .left { display:flex; gap:12px; align-items:center; }
+.topbar .right { display:flex; gap:10px; align-items:center; }
+
+/* ========= CARDS / PANELS ========= */
+.panel{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding:16px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); box-shadow:0 12px 36px rgba(0,0,0,0.08);
+}
+
+/* metric cards */
+.metrics{ display:grid; grid-template-columns: repeat(4,1fr); gap:12px; margin-bottom:12px; }
+.metric{ padding:14px; border-radius:10px; display:flex; align-items:center; gap:12px; }
+.metric .big{ font-family:"Poppins"; font-size:20px; font-weight:800; }
+
+/* tables */
+.table{ width:100%; border-collapse:collapse; margin-top:12px; }
+.table th, .table td{ padding:12px 10px; text-align:left; border-bottom:1px dashed rgba(255,255,255,0.03); color:var(--text) }
+.table th{ color:var(--muted); font-weight:700; font-size:13px }
+.table tr:hover{ background: rgba(255,255,255,0.01) }
+
+/* search & filter */
+.controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.input{ padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:var(--text); }
+
+/* modal (simple) */
+.modal-backdrop{
+  position:fixed; inset:0; background: rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1600;
+}
+.modal{ width:880px; max-width:96%; background:var(--panel); padding:18px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); box-shadow:0 30px 80px rgba(0,0,0,0.4); }
+
+/* small helpers */
+.kv{ color:var(--muted); font-size:13px; }
+.label{ font-weight:700; font-size:13px; color:var(--muted) }
+
+/* tiny responsive */
+@media (max-width:880px){
+  .metrics { grid-template-columns: repeat(2,1fr); }
+  .table th, .table td{ padding:10px 6px; font-size:13px }
+}
+@media (max-width:520px){
+  .metrics { grid-template-columns: 1fr; }
+}
+
+/* focus for accessibility */
+a:focus, button:focus, input:focus{ outline:3px solid rgba(79,140,255,0.12); outline-offset:3px; border-radius:8px; }
+
+/* reveal animation helper */
+.fade-up{ opacity:0; transform:translateY(12px); transition: all 520ms var(--ease); }
+.fade-up.show{ opacity:1; transform:none }
+  </style>
+</head>
+<body>
+  <!-- HEADER / NAV -->
+  <header>
+    <div class="container navbar" role="navigation" aria-label="Admin Navigation">
+      <div class="brand">
+        <div class="logo">SL</div>
+        <div>
+          <div class="meta">Smart Lab — Admin</div>
+          <div class="sub">Control & Oversight</div>
+        </div>
+      </div>
+
+      <nav aria-label="Primary navigation">
+        <ul>
+          <li><a class="link" href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+          <li><a class="link" href="#dash-overview">Dashboard</a></li>
+          <li><a class="link" href="#user-management">Users</a></li>
+          <li><a class="link" href="#inventory">Inventory</a></li>
+          <li><a class="link" href="#reports">Reports</a></li>
+        </ul>
+      </nav>
+
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="location.href='contact.html'"><i class="fa-solid fa-headset"></i></button>
+        <button class="btn btn-primary" id="logoutBtn"><i class="fa-solid fa-right-from-bracket" style="margin-right:8px"></i>Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid container" role="main">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" aria-label="Admin sidebar">
+      <h4>Admin Menu</h4>
+      <nav class="side-list" aria-label="Section links">
+        <a href="#dash-overview"><i class="fa-solid fa-chart-line"></i> Overview</a>
+        <a href="#user-management"><i class="fa-solid fa-users"></i> User Management</a>
+        <a href="#inventory"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
+        <a href="#reports"><i class="fa-solid fa-file-lines"></i> Reports</a>
+        <a href="#audit-log"><i class="fa-solid fa-list-check"></i> Audit Log</a>
+        <a href="#notifications"><i class="fa-solid fa-bell"></i> Notifications</a>
+        <a href="admin-settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+      </nav>
+
+      <div style="margin-top:auto">
+        <div class="side-stat">
+          <div>
+            <div style="font-weight:800">System Health</div>
+            <div class="kv">All systems operational</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:900; color:var(--accent-green)">OK</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px; text-align:center">
+          <button class="btn btn-primary" onclick="location.href='admin-panel.html'">Admin Home</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <section class="content" style="min-height:60vh">
+      <!-- TOPBAR -->
+      <div class="topbar">
+        <div class="left">
+          <h2 id="dash-overview" style="margin:0; font-family:'Poppins'">Admin Dashboard</h2>
+          <div style="color:var(--muted); margin-left:12px">Overview and quick actions</div>
+        </div>
+        <div class="right">
+          <div class="label">Search Users</div>
+          <input id="globalSearch" class="input" type="search" placeholder="Search by name, email or ID" aria-label="Search users">
+          <button class="btn btn-ghost" id="addUserBtn"><i class="fa-solid fa-user-plus" style="margin-right:8px"></i>Add User</button>
+        </div>
+      </div>
+
+      <!-- METRICS -->
+      <div class="metrics fade-up" id="metrics">
+        <div class="metric panel">
+          <div style="flex:1">
+            <div class="kv">Labs</div>
+            <div class="big" id="labsCount">120</div>
+            <div class="muted" style="font-size:13px">Active labs</div>
+          </div>
+          <div>
+            <i class="fa-solid fa-microscope" style="font-size:28px; color:var(--accent-purple)"></i>
+          </div>
+        </div>
+
+        <div class="metric panel">
+          <div style="flex:1">
+            <div class="kv">Users</div>
+            <div class="big" id="usersCount">8200</div>
+            <div class="muted" style="font-size:13px">Total users</div>
+          </div>
+          <div>
+            <i class="fa-solid fa-users" style="font-size:28px; color:var(--accent-blue)"></i>
+          </div>
+        </div>
+
+        <div class="metric panel">
+          <div style="flex:1">
+            <div class="kv">Equipment</div>
+            <div class="big" id="equipCount">600</div>
+            <div class="muted" style="font-size:13px">Items tracked</div>
+          </div>
+          <div>
+            <i class="fa-solid fa-boxes-stacked" style="font-size:28px; color:var(--gold)"></i>
+          </div>
+        </div>
+
+        <div class="metric panel">
+          <div style="flex:1">
+            <div class="kv">Reports</div>
+            <div class="big" id="reportCount">1,200</div>
+            <div class="muted" style="font-size:13px">Generated</div>
+          </div>
+          <div>
+            <i class="fa-solid fa-file-lines" style="font-size:28px; color:var(--accent-green)"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD LAYOUT -->
+      <div style="display:grid; grid-template-columns: 1fr 420px; gap:18px; margin-top:18px;">
+        <!-- Left column: user management & inventory -->
+        <div>
+          <!-- USER MANAGEMENT PANEL -->
+          <div class="panel fade-up" id="user-management">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:800; font-size:18px">User Management</div>
+                <div class="kv" style="margin-top:6px">Search, add, edit users and manage roles</div>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center">
+                <select id="roleFilter" class="input" aria-label="Filter by role">
+                  <option value="">All roles</option>
+                  <option value="Student">Student</option>
+                  <option value="Faculty">Faculty</option>
+                  <option value="LabAssistant">Lab Assistant</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Principal">Principal</option>
+                </select>
+                <button class="btn btn-primary" id="exportUsersBtn"><i class="fa-solid fa-file-csv" style="margin-right:8px"></i>Export</button>
+              </div>
+            </div>
+
+            <!-- User table -->
+            <div style="overflow:auto; margin-top:12px">
+              <table class="table" id="usersTable" aria-label="Users table">
+                <thead>
+                  <tr>
+                    <th style="width:6%">#ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th style="width:12%">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTbody">
+                  <!-- dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- pagination simple -->
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px">
+              <button class="btn btn-ghost" id="prevPage">Prev</button>
+              <div class="kv" id="pageIndicator">1 / 1</div>
+              <button class="btn btn-ghost" id="nextPage">Next</button>
+            </div>
+          </div>
+
+          <!-- INVENTORY PANEL -->
+          <div class="panel fade-up" id="inventory" style="margin-top:18px">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:800; font-size:18px">Inventory & Equipment</div>
+                <div class="kv" style="margin-top:6px">Track items, schedule maintenance, and update statuses</div>
+              </div>
+              <div>
+                <button class="btn btn-primary" id="addEquipBtn"><i class="fa-solid fa-plus" style="margin-right:8px"></i>Add Item</button>
+              </div>
+            </div>
+
+            <div style="overflow:auto; margin-top:12px">
+              <table class="table" id="equipTable" aria-label="Equipment table">
+                <thead>
+                  <tr><th>ID</th><th>Name</th><th>Status</th><th>Last Maint.</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="equipTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: charts, activity log, notifications -->
+        <aside>
+          <!-- Charts panel -->
+          <div class="panel fade-up" aria-hidden="false">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-weight:800">Usage Overview</div>
+              <div class="kv">Last 30 days</div>
+            </div>
+            <!-- small SVG line chart placeholder (simple, no library) -->
+            <div style="margin-top:12px">
+              <svg id="usageChart" viewBox="0 0 300 100" style="width:100%; height:140px; background:transparent; border-radius:8px"></svg>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:8px; justify-content:space-between">
+              <div class="kv">Bookings</div><div class="kv">Equipment usage</div><div class="kv">Reports</div>
+            </div>
+          </div>
+
+          <!-- Activity / Audit log -->
+          <div class="panel fade-up" id="audit-log" style="margin-top:18px">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <div style="font-weight:800">Audit Log</div>
+              <div class="kv">Recent activity</div>
+            </div>
+            <div style="max-height:280px; overflow:auto; margin-top:10px" id="auditFeed" aria-live="polite">
+              <!-- dynamic feed entries -->
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px; justify-content:flex-end">
+              <button class="btn btn-ghost" id="clearAudit">Clear</button>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="panel fade-up" id="notifications" style="margin-top:18px">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <div style="font-weight:800">Alerts & Notifications</div>
+              <div class="kv">Critical & info</div>
+            </div>
+            <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px">
+              <div class="panel" style="padding:10px; border-radius:8px;">
+                <div style="font-weight:700">Low inventory: Soldering Iron</div>
+                <div class="kv">Only 2 left in Lab E — order soon</div>
+              </div>
+              <div class="panel" style="padding:10px; border-radius:8px;">
+                <div style="font-weight:700">Maintenance due: Oscilloscope</div>
+                <div class="kv">Scheduled for inspection on 2025-09-10</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- REPORTS SECTION -->
+      <div class="panel fade-up" id="reports" style="margin-top:18px">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <div>
+            <div style="font-weight:800; font-size:18px">Reports</div>
+            <div class="kv" style="margin-top:6px">Generate and export reports</div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center">
+            <select id="reportType" class="input" aria-label="Report type">
+              <option value="usage">Usage Summary (CSV)</option>
+              <option value="inventory">Inventory Snapshot (CSV)</option>
+              <option value="audit">Audit Log (CSV)</option>
+            </select>
+            <button class="btn btn-primary" id="generateReportBtn"><i class="fa-solid fa-file-export" style="margin-right:8px"></i>Generate</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="kv">Report preview (static)</div>
+          <div style="margin-top:8px; padding:12px; border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.02)">
+            <pre id="reportPreview" style="white-space:pre-wrap; color:var(--muted); font-size:13px; margin:0">
+Sample CSV preview will appear here after generating a report.
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer style="margin-top:18px">
+        <div class="container footer-grid fade-up" style="display:grid; grid-template-columns: 1fr 1fr; gap:18px;">
+          <div>
+            <strong>Smart Laboratory Management System — Admin</strong>
+            <div class="kv" style="margin-top:8px">Monitoring • Users • Inventory</div>
+          </div>
+          <div style="text-align:right">
+            <div class="kv">Contact: smartlab@college.edu</div>
+            <div class="kv" style="margin-top:8px">© 2025 SmartLab</div>
+          </div>
+        </div>
+      </footer>
+    </section>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div id="modalContent">
+        <!-- dynamic modal content -->
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING -->
+  <div style="position:fixed; right:20px; bottom:20px; display:flex; flex-direction:column; gap:12px; z-index:1500">
+    <button id="scrollTop" class="fab" title="Scroll to top" style="display:none; width:56px; height:56px; border-radius:12px; background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:white; border:0"><i class="fa-solid fa-arrow-up"></i></button>
+    <button id="themeToggle" class="fab alt" title="Toggle theme" style="width:56px; height:56px; border-radius:12px; background:linear-gradient(90deg,var(--accent-green), #4cd79f); color:white; border:0"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+
+    /* ------------------------
+       Sample mock data
+       ------------------------ */
+    let users = [
+      { id: 101, name: 'Aisha Khan', email: 'aisha.k@example.edu', role: 'Student' },
+      { id: 102, name: 'Dr. Rao', email: 'rao@example.edu', role: 'Faculty' },
+      { id: 103, name: 'Ravi Kumar', email: 'ravi.k@example.edu', role: 'LabAssistant' },
+      { id: 104, name: 'Priya Singh', email: 'priya.s@example.edu', role: 'Admin' },
+      { id: 105, name: 'Principal Sharma', email: 'principal@example.edu', role: 'Principal' },
+      // add more rows to demo pagination
+    ];
+    for(let i=106;i<150;i++){
+      users.push({ id: i, name: 'User '+i, email: `user${i}@college.edu`, role: (i%5===0?'Admin': i%4===0?'Faculty': i%3===0?'LabAssistant': 'Student') });
+    }
+
+    let equipment = [
+      { id: 'EQ-001', name: 'Oscilloscope', status: 'OK', lastMaint: '2025-06-12' },
+      { id: 'EQ-002', name: 'Soldering Iron', status: 'LOW', lastMaint: '2025-04-01' },
+      { id: 'EQ-003', name: '3D Printer', status: 'MAINT', lastMaint: '2025-07-18' },
+    ];
+    for(let i=4;i<=40;i++){
+      equipment.push({ id: 'EQ-'+String(i).padStart(3,'0'), name:`Equipment ${i}`, status: i%7===0? 'MAINT':'OK', lastMaint:'2025-05-21' });
+    }
+
+    let audit = [
+      { ts: Date.now()-1000*60*60, text: 'Admin logged in' },
+      { ts: Date.now()-1000*60*30, text: 'Ravi updated equipment EQ-002 status to LOW' },
+      { ts: Date.now()-1000*60*10, text: 'Dr. Rao approved booking #B-112' }
+    ];
+
+    /* ------------------------
+       Helpers: DOM refs
+       ------------------------ */
+    const usersTbody = document.getElementById('usersTbody');
+    const equipTbody = document.getElementById('equipTbody');
+    const auditFeed = document.getElementById('auditFeed');
+    const usersCountEl = document.getElementById('usersCount');
+    const labsCountEl = document.getElementById('labsCount');
+    const equipCountEl = document.getElementById('equipCount');
+    const reportCountEl = document.getElementById('reportCount');
+
+    /* ------------------------
+       Pagination state for users
+       ------------------------ */
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
+    let filteredUsers = users.slice();
+
+    /* ------------------------
+       Render functions
+       ------------------------ */
+    function renderUsers(){
+      // apply pagination
+      const start = (currentPage-1)*PAGE_SIZE;
+      const pageItems = filteredUsers.slice(start, start+PAGE_SIZE);
+
+      usersTbody.innerHTML = '';
+      pageItems.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>#${u.id}</td>
+          <td>${escapeHtml(u.name)}</td>
+          <td>${escapeHtml(u.email)}</td>
+          <td>${escapeHtml(u.role)}</td>
+          <td>
+            <button class="btn btn-ghost" data-action="edit" data-id="${u.id}"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button class="btn btn-ghost" data-action="delete" data-id="${u.id}"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        usersTbody.appendChild(tr);
+      });
+
+      // update page indicator
+      const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+      document.getElementById('pageIndicator').textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById('prevPage').disabled = currentPage <= 1;
+      document.getElementById('nextPage').disabled = currentPage >= totalPages;
+
+      // update counts
+      usersCountEl.textContent = formatNumber(users.length);
+    }
+
+    function renderEquipment(){
+      equipTbody.innerHTML = '';
+      equipment.forEach(eq => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(eq.id)}</td>
+          <td>${escapeHtml(eq.name)}</td>
+          <td>${escapeHtml(eq.status)}</td>
+          <td>${escapeHtml(eq.lastMaint)}</td>
+          <td>
+            <button class="btn btn-ghost" data-eid="${eq.id}" data-action="edit-eq"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button class="btn btn-ghost" data-eid="${eq.id}" data-action="maint-eq"><i class="fa-solid fa-wrench"></i></button>
+          </td>
+        `;
+        equipTbody.appendChild(tr);
+      });
+      equipCountEl.textContent = formatNumber(equipment.length);
+    }
+
+    function renderAudit(){
+      auditFeed.innerHTML = '';
+      audit.slice().reverse().forEach(item => {
+        const d = new Date(item.ts);
+        const el = document.createElement('div');
+        el.style.padding = '8px';
+        el.style.borderBottom = '1px dashed rgba(255,255,255,0.03)';
+        el.innerHTML = `<div style="font-weight:700">${escapeHtml(item.text)}</div><div class="kv" style="font-size:12px">${d.toLocaleString()}</div>`;
+        auditFeed.appendChild(el);
+      });
+    }
+
+    /* ------------------------
+       Utility helpers
+       ------------------------ */
+    function escapeHtml(s){
+      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+    function formatNumber(n){ return n.toLocaleString(); }
+
+    /* ------------------------
+       Search / filter / pagination handlers
+       ------------------------ */
+    document.getElementById('globalSearch').addEventListener('input', (e)=>{
+      const q = e.target.value.trim().toLowerCase();
+      filteredUsers = users.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || String(u.id).includes(q));
+      currentPage = 1;
+      renderUsers();
+    });
+
+    document.getElementById('roleFilter').addEventListener('change', (e)=>{
+      const r = e.target.value;
+      filteredUsers = users.filter(u => !r || u.role === r);
+      currentPage = 1;
+      renderUsers();
+    });
+
+    document.getElementById('prevPage').addEventListener('click', ()=>{
+      currentPage = Math.max(1, currentPage-1);
+      renderUsers();
+    });
+    document.getElementById('nextPage').addEventListener('click', ()=>{
+      const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+      currentPage = Math.min(totalPages, currentPage+1);
+      renderUsers();
+    });
+
+    /* ------------------------
+       Add / Edit User modal
+       ------------------------ */
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalContent = document.getElementById('modalContent');
+
+    function openUserModal(mode='add', user=null){
+      // mode: 'add' or 'edit'
+      modalBackdrop.style.display = 'flex';
+      modalBackdrop.setAttribute('aria-hidden','false');
+      modalContent.innerHTML = `
+        <h3 id="modalTitle">${mode==='add' ? 'Add New User' : 'Edit User'}</h3>
+        <form id="userForm" style="margin-top:12px; display:grid; gap:10px;">
+          <div style="display:flex; gap:8px;">
+            <input class="input" name="name" placeholder="Full name" value="${user?escapeHtml(user.name):''}" required style="flex:1"/>
+            <input class="input" name="email" placeholder="Email" value="${user?escapeHtml(user.email):''}" required style="flex:1"/>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input class="input" name="id" placeholder="User ID" value="${user?user.id:''}" ${mode==='edit'?'readonly':''} style="width:160px"/>
+            <select name="role" class="input" style="flex:1">
+              <option ${user && user.role==='Student'?'selected':''}>Student</option>
+              <option ${user && user.role==='Faculty'?'selected':''}>Faculty</option>
+              <option ${user && user.role==='LabAssistant'?'selected':''}>LabAssistant</option>
+              <option ${user && user.role==='Admin'?'selected':''}>Admin</option>
+              <option ${user && user.role==='Principal'?'selected':''}>Principal</option>
+            </select>
+          </div>
+
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px">
+            <button type="button" class="btn btn-ghost" id="cancelModal">Cancel</button>
+            <button type="submit" class="btn btn-primary">${mode==='add'?'Create':'Save'}</button>
+          </div>
+        </form>
+      `;
+
+      document.getElementById('cancelModal').addEventListener('click', closeModal);
+      document.getElementById('userForm').addEventListener('submit', (ev)=>{
+        ev.preventDefault();
+        const fd = new FormData(ev.target);
+        const id = fd.get('id') || String(Date.now()).slice(-6); // default id
+        const record = { id: Number(id), name: fd.get('name'), email: fd.get('email'), role: fd.get('role') };
+        if(mode==='add'){
+          users.unshift(record);
+          auditPush(`Admin created user ${record.name} (#${record.id})`);
+        } else {
+          // replace existing
+          const idx = users.findIndex(u=>u.id==record.id);
+          if(idx!==-1) users[idx] = record;
+          auditPush(`Admin updated user ${record.name} (#${record.id})`);
+        }
+        filteredUsers = users.slice();
+        closeModal();
+        renderUsers();
+        renderAudit();
+      });
+    }
+
+    function closeModal(){
+      modalBackdrop.style.display = 'none';
+      modalBackdrop.setAttribute('aria-hidden','true');
+      modalContent.innerHTML = '';
+    }
+
+    document.getElementById('addUserBtn').addEventListener('click', ()=> openUserModal('add', null));
+
+    // delegated events for edit/delete in users table
+    usersTbody.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      if(action === 'edit'){
+        const user = users.find(u=>String(u.id) === String(id));
+        if(user) openUserModal('edit', user);
+      } else if(action === 'delete'){
+        if(confirm('Delete this user?')) {
+          users = users.filter(u=>String(u.id) !== String(id));
+          filteredUsers = users.slice();
+          auditPush(`Admin deleted user #${id}`);
+          renderUsers();
+        }
+      }
+    });
+
+    /* ------------------------
+       Equipment add/edit modal
+       ------------------------ */
+    document.getElementById('addEquipBtn').addEventListener('click', ()=> openEquipModal('add'));
+
+    function openEquipModal(mode='add', eq=null){
+      modalBackdrop.style.display = 'flex';
+      modalBackdrop.setAttribute('aria-hidden','false');
+      modalContent.innerHTML = `
+        <h3 id="modalTitle">${mode==='add' ? 'Add Equipment' : 'Edit Equipment'}</h3>
+        <form id="equipForm" style="margin-top:12px; display:grid; gap:10px;">
+          <div style="display:flex; gap:8px;">
+            <input class="input" name="id" placeholder="Equipment ID" value="${eq?escapeHtml(eq.id):''}" ${mode==='edit'?'readonly':''} required style="width:220px"/>
+            <input class="input" name="name" placeholder="Equipment name" value="${eq?escapeHtml(eq.name):''}" required style="flex:1"/>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <select name="status" class="input" style="width:180px">
+              <option ${eq && eq.status==='OK'?'selected':''}>OK</option>
+              <option ${eq && eq.status==='LOW'?'selected':''}>LOW</option>
+              <option ${eq && eq.status==='MAINT'?'selected':''}>MAINT</option>
+            </select>
+            <input class="input" name="lastMaint" placeholder="Last maintenance date" value="${eq?escapeHtml(eq.lastMaint):''}" style="flex:1" />
+          </div>
+
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px">
+            <button type="button" class="btn btn-ghost" id="cancelEquip">Cancel</button>
+            <button type="submit" class="btn btn-primary">${mode==='add'?'Add':'Save'}</button>
+          </div>
+        </form>
+      `;
+
+      document.getElementById('cancelEquip').addEventListener('click', closeModal);
+      document.getElementById('equipForm').addEventListener('submit', (ev)=>{
+        ev.preventDefault();
+        const fd = new FormData(ev.target);
+        const record = { id: fd.get('id') || `EQ-${Date.now()}`, name: fd.get('name'), status: fd.get('status'), lastMaint: fd.get('lastMaint') || new Date().toISOString().slice(0,10) };
+        if(mode==='add'){
+          equipment.unshift(record);
+          auditPush(`Admin added equipment ${record.name} (${record.id})`);
+        } else {
+          const idx = equipment.findIndex(e=>e.id === record.id);
+          if(idx!==-1) equipment[idx] = record;
+          auditPush(`Admin updated equipment ${record.name} (${record.id})`);
+        }
+        closeModal();
+        renderEquipment();
+        renderAudit();
+      });
+    }
+
+    // delegated equipment actions
+    equipTbody.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.eid;
+      if(action === 'edit-eq'){
+        const eq = equipment.find(x=>x.id === id);
+        if(eq) openEquipModal('edit', eq);
+      } else if(action === 'maint-eq'){
+        if(confirm('Mark as maintenance completed?')){
+          const eqi = equipment.find(x=>x.id === id);
+          if(eqi){
+            eqi.status = 'OK';
+            eqi.lastMaint = new Date().toISOString().slice(0,10);
+            auditPush(`Maintenance completed on ${eqi.name} (${eqi.id})`);
+            renderEquipment();
+            renderAudit();
+          }
+        }
+      }
+    });
+
+    /* ------------------------
+       Export users to CSV
+       ------------------------ */
+    document.getElementById('exportUsersBtn').addEventListener('click', ()=>{
+      const csv = [ ['id','name','email','role'], ...users.map(u=>[u.id,u.name,u.email,u.role]) ].map(r => r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+      downloadBlob(csv, 'users.csv', 'text/csv;charset=utf-8;');
+      auditPush('Admin exported users CSV');
+    });
+
+    function downloadBlob(content, filename, type){
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      a.remove(); URL.revokeObjectURL(url);
+    }
+
+    /* ------------------------
+       Generate report (simple client-side CSV generation example)
+       ------------------------ */
+    document.getElementById('generateReportBtn').addEventListener('click', ()=>{
+      const type = document.getElementById('reportType').value;
+      let text = '';
+      if(type === 'usage'){
+        text = 'date,bookings,students\\n2025-07-01,12,120\\n2025-07-02,8,96';
+      } else if(type === 'inventory'){
+        text = 'id,name,status,lastMaint\\n' + equipment.slice(0,10).map(e=>`${e.id},${e.name},${e.status},${e.lastMaint}`).join('\\n');
+      } else if(type === 'audit'){
+        text = 'ts,text\\n' + audit.map(a=>`${new Date(a.ts).toISOString()},${a.text.replace(/,/g,';')}`).join('\\n');
+      }
+      document.getElementById('reportPreview').textContent = text;
+      // offer download
+      downloadBlob(text, `${type}-report.csv`, 'text/csv;charset=utf-8;');
+      auditPush(`Report generated: ${type}`);
+    });
+
+    /* ------------------------
+       Simple usage chart (SVG)
+       ------------------------ */
+    function drawUsageChart(){
+      const svg = document.getElementById('usageChart');
+      // sample data
+      const data = [4,8,6,12,10,9,14,12,10,8,6,9,11,7,10,12,9,5,7,6,8,10,13,11,9,7,8,10,12,9];
+      const w = 300, h = 100, pad=8;
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      svg.innerHTML = '<defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="'+getComputedStyle(document.documentElement).getPropertyValue('--accent-blue').trim()+'"/><stop offset="1" stop-color="'+getComputedStyle(document.documentElement).getPropertyValue('--accent-purple').trim()+'"/></linearGradient></defs>';
+      const max = Math.max(...data);
+      const step = (w - pad*2) / (data.length-1);
+      let path = '';
+      let area = '';
+      data.forEach((v,i)=>{
+        const x = pad + i*step;
+        const y = h - pad - (v/max)*(h - pad*2);
+        path += (i===0?`M ${x} ${y}`:` L ${x} ${y}`);
+        area += (i===0?`M ${x} ${h-pad} L ${x} ${y}`:` L ${x} ${y}`);
+      });
+      area += ` L ${pad + (data.length-1)*step} ${h-pad} Z`;
+      svg.innerHTML += `<path d="${area}" fill="url(#g1)" opacity="0.12"></path><path d="${path}" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--accent-blue').trim()}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>`;
+    }
+
+    /* ------------------------
+       Audit push helper
+       ------------------------ */
+    function auditPush(text){
+      audit.push({ ts: Date.now(), text });
+      renderAudit();
+    }
+    document.getElementById('clearAudit').addEventListener('click', ()=>{
+      if(confirm('Clear audit log?')){ audit = []; renderAudit(); auditPush('Admin cleared audit log'); }
+    });
+
+    /* ------------------------
+       Modal dismiss clicking backdrop
+       ------------------------ */
+    modalBackdrop.addEventListener('click', (e)=>{
+      if(e.target === modalBackdrop) closeModalGeneric();
+    });
+    function closeModalGeneric(){ modalBackdrop.style.display='none'; modalBackdrop.setAttribute('aria-hidden','true'); modalContent.innerHTML=''; }
+
+    /* ------------------------
+       Simple delegated listeners for dynamic elements
+       ------------------------ */
+    document.addEventListener('click', (e)=>{
+      // if modal cancel buttons exist they are wired already
+    });
+
+    /* ------------------------
+       Theme toggle (persist)
+       ------------------------ */
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const savedTheme = localStorage.getItem('smartlab-theme');
+    if(savedTheme === 'light'){ document.documentElement.classList.add('light'); themeIcon.className='fa-solid fa-sun' }
+    else { document.documentElement.classList.remove('light'); themeIcon.className='fa-solid fa-moon' }
+
+    themeToggle.addEventListener('click', ()=>{
+      const isLight = document.documentElement.classList.toggle('light');
+      themeIcon.className = isLight ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      localStorage.setItem('smartlab-theme', isLight ? 'light' : 'dark');
+    });
+
+    /* ------------------------
+       Scroll-to-top
+       ------------------------ */
+    const scrollTop = document.getElementById('scrollTop');
+    window.addEventListener('scroll', ()=> {
+      scrollTop.style.display = window.scrollY > 300 ? 'flex' : 'none';
+    });
+    scrollTop.addEventListener('click', ()=> window.scrollTo({ top:0, behavior:'smooth' }));
+
+    /* ------------------------
+       Reveal on scroll (IntersectionObserver)
+       ------------------------ */
+    const revealEls = document.querySelectorAll('.fade-up');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('show');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.14 });
+    revealEls.forEach(el => io.observe(el));
+
+    /* ------------------------
+       Initialization
+       ------------------------ */
+    function init(){
+      renderUsers();
+      renderEquipment();
+      renderAudit();
+      drawUsageChart();
+    }
+    init();
+
+    /* ------------------------
+       Helper: close modal used by other functions
+       ------------------------ */
+    function closeModal(){ closeModalGeneric(); }
+
+    /* export to window (for console debugging) */
+    window.SMARTLAB = { users, equipment, audit };
+
+    // End IIFE
+  })();
+  </script>
+</body>
+</html>

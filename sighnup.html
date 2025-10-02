@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Smart Lab System</title>
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    
+    <!-- Google Fonts & Material Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- Embedded CSS for Styling -->
+    <style>
+        /* ---------------------------------- */
+        /* 1. DESIGN SYSTEM & THEME         */
+        /* ---------------------------------- */
+        :root {
+            --primary-color: #007BFF;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --surface-color: #FFFFFF;
+            --background-color: #f4f7fc;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --font-family-base: 'Poppins', sans-serif;
+            --border-radius-lg: 12px;
+            --box-shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --transition-smooth: 0.3s ease-in-out;
+        }
+
+        /* ---------------------------------- */
+        /* 2. GLOBAL & LAYOUT STYLES        */
+        /* ---------------------------------- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background: linear-gradient(120deg, #f0f4f8, #d9e2ec);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .signup-container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-lg);
+            display: grid;
+            grid-template-columns: 1fr 1.2fr; /* Give more space to the form */
+            overflow: hidden;
+        }
+
+        /* ---------------------------------- */
+        /* 3. ILLUSTRATION (LEFT SIDE)      */
+        /* ---------------------------------- */
+        .signup-illustration {
+            background-image: linear-gradient(to top, rgba(0, 123, 255, 0.85), rgba(40, 167, 69, 0.85)), url('https://www.fotor.com/convert/jpg-converter/');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            color: rgb(143, 16, 16);
+            text-align: center;
+        }
+        .signup-illustration .material-icons-outlined {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+        .illustration-text h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .illustration-text p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        /* ---------------------------------- */
+        /* 4. SIGN UP FORM (RIGHT SIDE)     */
+        /* ---------------------------------- */
+        .signup-form-wrapper {
+            padding: 2.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .form-header p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: #f9fafb;
+            transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+        }
+        
+        /* Validation Styles */
+        .validation-message {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            height: 1rem; /* Prevent layout shift */
+        }
+        .valid { color: var(--success-color); }
+        .invalid { color: var(--danger-color); }
+        .form-control.valid { border-color: var(--success-color); }
+        .form-control.invalid { border-color: var(--danger-color); }
+
+        .btn-signup {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            font-family: var(--font-family-base);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-smooth);
+        }
+        /* Disabled state for the button */
+        .btn-signup:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .btn-signup:not(:disabled):hover {
+            filter: brightness(110%);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+        }
+        .login-link a {
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        /* ---------------------------------- */
+        /* 5. RESPONSIVENESS                  */
+        /* ---------------------------------- */
+        @media (max-width: 992px) {
+            body { padding: 0; }
+            .signup-container {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+                min-height: 100vh;
+                border-radius: 0;
+            }
+            .signup-illustration {
+                display: none;
+            }
+            .signup-form-wrapper {
+                padding: 2rem;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="signup-container">
+        <!-- ======================= -->
+        <!--  ILLUSTRATION SECTION   -->
+        <!-- ======================= -->
+        <div class="signup-illustration">
+            <span class="material-icons-outlined">science</span>
+            <div class="illustration-text">
+                <h2>Join the Future of Lab Management</h2>
+                <p>Create your account to access real-time schedules, submit reports effortlessly, and collaborate like never before.</p>
+            </div>
+        </div>
+
+        <!-- ======================= -->
+        <!--      FORM SECTION       -->
+        <!-- ======================= -->
+        <div class="signup-form-wrapper">
+            <div class="form-header">
+                <h1>Create an Account</h1>
+                <p>Let's get you started with the SmartLab System.</p>
+            </div>
+
+            <form id="signup-form" novalidate>
+                <div class="form-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" class="form-control" required placeholder="e.g., Priya Sharma">
+                    <div class="validation-message" id="fullname-validation"></div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" required placeholder="e.g., user@college.edu">
+                    <div class="validation-message" id="email-validation"></div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" required>
+                    <div class="validation-message" id="password-validation">Password must be at least 8 characters.</div>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" class="form-control" required>
+                    <div class="validation-message" id="confirm-password-validation"></div>
+                </div>
+                <div class="form-group">
+                    <label for="role">I am a:</label>
+                    <select id="role" name="role" class="form-control">
+                        <option value="student">Student</option>
+                        <option value="faculty">Faculty</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-signup" id="signup-button" disabled>Create Account</button>
+            </form>
+            
+            <p class="login-link">
+                Already have an account? <a href="login.html">Sign In</a>
+            </p>
+        </div>
+    </div>
+    
+    <!-- Embedded JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. GET DOM ELEMENTS ---
+            const form = document.getElementById('signup-form');
+            const fullnameInput = document.getElementById('fullname');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            const signupButton = document.getElementById('signup-button');
+
+            const fullnameValidation = document.getElementById('fullname-validation');
+            const emailValidation = document.getElementById('email-validation');
+            const passwordValidation = document.getElementById('password-validation');
+            const confirmPasswordValidation = document.getElementById('confirm-password-validation');
+
+            // --- 2. VALIDATION FUNCTIONS ---
+            const validators = {
+                fullname: {
+                    isValid: () => fullnameInput.value.trim().length > 0,
+                    message: "Full name is required."
+                },
+                email: {
+                    isValid: () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value),
+                    message: "Please enter a valid email address."
+                },
+                password: {
+                    isValid: () => passwordInput.value.length >= 8,
+                    message: "Password must be at least 8 characters."
+                },
+                confirmPassword: {
+                    isValid: () => confirmPasswordInput.value === passwordInput.value && confirmPasswordInput.value.length > 0,
+                    message: "Passwords do not match."
+                }
+            };
+
+            // --- 3. REAL-TIME VALIDATION HANDLER ---
+            function validateField(input, validationElement, validator) {
+                if (input.value.trim() === '') {
+                    validationElement.textContent = '';
+                    input.classList.remove('valid', 'invalid');
+                    return false;
+                }
+                
+                const isValid = validator.isValid();
+                validationElement.textContent = isValid ? '✓ Looks good!' : validator.message;
+                validationElement.className = `validation-message ${isValid ? 'valid' : 'invalid'}`;
+                input.classList.toggle('valid', isValid);
+                input.classList.toggle('invalid', !isValid);
+                return isValid;
+            }
+
+            function checkFormValidity() {
+                const isFullnameValid = validators.fullname.isValid();
+                const isEmailValid = validators.email.isValid();
+                const isPasswordValid = validators.password.isValid();
+                const isConfirmPasswordValid = validators.confirmPassword.isValid();
+
+                // Enable button only if all fields are valid
+                signupButton.disabled = !(isFullnameValid && isEmailValid && isPasswordValid && isConfirmPasswordValid);
+            }
+
+            // --- 4. ATTACH EVENT LISTENERS ---
+            fullnameInput.addEventListener('input', () => {
+                validateField(fullnameInput, fullnameValidation, validators.fullname);
+                checkFormValidity();
+            });
+            emailInput.addEventListener('input', () => {
+                validateField(emailInput, emailValidation, validators.email);
+                checkFormValidity();
+            });
+            passwordInput.addEventListener('input', () => {
+                validateField(passwordInput, passwordValidation, validators.password);
+                // Also re-validate the confirm password field if it has a value
+                if (confirmPasswordInput.value) {
+                    validateField(confirmPasswordInput, confirmPasswordValidation, validators.confirmPassword);
+                }
+                checkFormValidity();
+            });
+            confirmPasswordInput.addEventListener('input', () => {
+                validateField(confirmPasswordInput, confirmPasswordValidation, validators.confirmPassword);
+                checkFormValidity();
+            });
+
+            // --- 5. FORM SUBMISSION ---
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                if (!signupButton.disabled) {
+                    const role = document.getElementById('role').value;
+                    alert(`Account creation successful!\n\nName: ${fullnameInput.value}\nEmail: ${emailInput.value}\nRole: ${role}\n\nRedirecting to login page...`);
+                    // In a real app, you would send this data to a backend (e.g., Firebase)
+                    // and then redirect on success.
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

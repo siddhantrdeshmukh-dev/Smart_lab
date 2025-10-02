@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Lab — Lab Assistant Dashboard</title>
+
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <meta name="theme-color" content="#0b2340">
+  <style>
+/* =========================
+   THEME, RESET & UTILITIES
+   ========================= */
+:root{
+  --bg-900:#071021; --bg-800:#0b2540; --surface: #0f2b48; --muted:#98a6b3; --text:#eaf3ff;
+  --accent-blue:#4f8cff; --accent-purple:#8b5cf6; --accent-green:#34d399; --accent-red:#ff6b6b; --accent-yellow:#ffd166;
+  --glass: rgba(255,255,255,0.03); --radius:12px; --container:1400px; --ease: cubic-bezier(.2,.9,.3,1);
+}
+html.light{
+  --bg-900:#f7fbff; --bg-800:#eef6ff; --surface:#ffffff; --muted:#6b7280; --text:#0b2340; --glass: rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box}
+body{ margin:0; font-family:"Roboto",sans-serif; background:var(--bg-800); color:var(--text); line-height:1.45; }
+.container{ max-width:var(--container); margin:0 auto; padding:0 20px; }
+.kv{ color:var(--muted); font-size:13px; }
+.hidden{ display:none!important; }
+.fade-in{ opacity:0; transform:translateY(12px); transition: all 520ms var(--ease); }
+.fade-in.show{ opacity:1; transform:none }
+
+/* =========================
+   LAYOUT & HEADER
+   ========================= */
+.header{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; position:sticky; top:0; z-index:1200; backdrop-filter:blur(6px); background:linear-gradient(180deg,rgba(8,12,20,0.6),rgba(8,12,20,0.35)); border-bottom:1px solid var(--glass); }
+html.light .header{ background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9)); border-bottom:1px solid rgba(0,0,0,0.06); }
+.brand{ display:flex; gap:12px; align-items:center; }
+.logo{ width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-blue),var(--accent-green)); color:#fff; font-weight:800; font-family:"Poppins"; }
+.dashboard-wrap{ display:grid; grid-template-columns:260px 1fr; gap:20px; padding:20px 0; }
+.sidebar{ position:sticky; top:84px; height:calc(100vh - 120px); padding:18px; border-radius:var(--radius); background:var(--surface); border:1px solid var(--glass); box-shadow:0 12px 36px rgba(0,0,0,0.12); display:flex; flex-direction:column; gap:12px; }
+.content{ padding:0; }
+
+/* =========================
+   SHARED COMPONENTS
+   ========================= */
+.btn{ border:0; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
+.btn-primary{ background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; }
+.btn-ghost{ background:transparent; border:1px solid var(--glass); color:var(--text); }
+.card{ background:var(--surface); padding:18px; border-radius:var(--radius); border:1px solid var(--glass); box-shadow:0 12px 36px rgba(0,0,0,0.08); }
+.tab-btn{ display:flex; gap:12px; align-items:center; padding:12px; border-radius:10px; font-weight:700; cursor:pointer; background:transparent; border:0; color:var(--text); width:100%; text-align:left; }
+.tab-btn[aria-selected="true"]{ background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; }
+.data-table{ width:100%; border-collapse:collapse; margin-top:12px; }
+.data-table th, .data-table td{ padding:12px; text-align:left; border-bottom:1px solid var(--glass); }
+.data-table th{ font-size:13px; color:var(--muted); }
+.status-badge{ padding:4px 8px; border-radius:8px; font-size:12px; font-weight:700; }
+.status-available{ background:rgba(52,211,153,0.1); color:var(--accent-green); }
+.status-in-use{ background:rgba(255,209,102,0.1); color:var(--accent-yellow); }
+.status-maintenance{ background:rgba(255,107,107,0.1); color:var(--accent-red); }
+.status-graded{ background:rgba(52,211,153,0.1); color:var(--accent-green); }
+.status-pending{ background:rgba(255,209,102,0.1); color:var(--accent-yellow); }
+
+/* =========================
+   LIVE TRACKER STYLES
+   ========================= */
+.equipment-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+.equipment-card {
+    border: 1px solid var(--glass);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: all 0.3s var(--ease);
+}
+.equipment-card.status-available { border-left: 5px solid var(--accent-green); }
+.equipment-card.status-in-use { border-left: 5px solid var(--accent-yellow); }
+.equipment-card.status-maintenance { border-left: 5px solid var(--accent-red); }
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media(max-width:980px){
+  .dashboard-wrap{ grid-template-columns:1fr; }
+  .sidebar{ position:relative; top:0; height:auto; flex-direction:row; overflow-x:auto; }
+  .tab-btn{ flex-direction:column; gap:4px; font-size:12px; }
+}
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header container">
+    <div class="brand">
+      <div class="logo">SL</div>
+      <div>
+        <div style="font-weight:700;">Lab Assistant Dashboard</div>
+        <div class="kv">Smart Laboratory System</div>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-weight:800">Ravi Kumar</div>
+      <div class="kv">Lab Assistant</div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="container dashboard-wrap">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <button class="tab-btn" data-tab="tracker" aria-selected="true"><i class="fa-solid fa-satellite-dish"></i> Live Tracker</button>
+      <button class="tab-btn" data-tab="reports"><i class="fa-solid fa-file-lines"></i> All Reports</button>
+      <button class="tab-btn" data-tab="maintenance"><i class="fa-solid fa-screwdriver-wrench"></i> Maintenance</button>
+      <div style="margin-top:auto"></div>
+      <button class="tab-btn" data-tab="settings"><i class="fa-solid fa-cog"></i> Settings</button>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <section class="content">
+      <div id="tabContainer">
+
+        <!-- Live Equipment Tracker -->
+        <div class="tab-panel fade-in show" id="panel-tracker">
+          <h2 style="font-family:'Poppins'; margin-top:0;">Live Equipment Tracker</h2>
+          <div class="card">
+            <div id="equipment-grid" class="equipment-grid"></div>
+          </div>
+        </div>
+
+        <!-- All Reports -->
+        <div class="tab-panel fade-in hidden" id="panel-reports">
+            <h2 style="font-family:'Poppins'; margin-top:0;">All Submitted Reports</h2>
+            <div class="card">
+                <table class="data-table">
+                    <thead><tr><th>Report ID</th><th>Student Name</th><th>Class</th><th>Status</th><th>Submitted On</th></tr></thead>
+                    <tbody id="reports-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Maintenance -->
+        <div class="tab-panel fade-in hidden" id="panel-maintenance">
+            <h2 style="font-family:'Poppins'; margin-top:0;">Maintenance Log</h2>
+            <div class="card">
+                <table class="data-table">
+                    <thead><tr><th>Equipment ID</th><th>Issue</th><th>Reported By</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="maintenance-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="tab-panel fade-in hidden" id="panel-settings">
+          <h2 style="font-family:'Poppins'; margin-top:0;">Settings</h2>
+          <div class="card">
+            <button id="themeToggle" class="btn btn-ghost">Toggle Light/Dark Mode</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+(function() {
+    'use strict';
+    /* =========================
+       MOCK DATA
+       ========================= */
+    const students = [
+        { id: 'S001', name: 'Aarav Sharma' }, { id: 'S002', name: 'Diya Patel' },
+        { id: 'S009', name: 'Arjun Kumar' }, { id: 'S010', name: 'Saanvi Desai' },
+        { id: 'S017', name: 'Ishaan Bhatt' }, { id: 'S018', name: 'Myra Chauhan' },
+        { id: 'S025', name: 'Neel Bajaj' }, { id: 'S026', name: 'Kiara Ahuja' }
+    ];
+
+    let equipment = [
+        { id: 'CAM-01', name: 'High-Res Camera', status: 'Available', occupiedBy: null },
+        { id: 'CAM-02', name: 'High-Res Camera', status: 'In-Use', occupiedBy: 'S001' },
+        { id: 'SVR-01', name: 'Database Server', status: 'In-Use', occupiedBy: 'S009' },
+        { id: 'SVR-02', name: 'Database Server', status: 'Available', occupiedBy: null },
+        { id: 'DAQ-01', name: 'Data Acquisition Card', status: 'Maintenance', occupiedBy: null },
+        { id: 'DAQ-02', name: 'Data Acquisition Card', status: 'In-Use', occupiedBy: 'S017' },
+        { id: 'VM-01', name: 'Cybersecurity VM', status: 'In-Use', occupiedBy: 'S025' },
+        { id: 'VM-02', name: 'Cybersecurity VM', status: 'Available', occupiedBy: null },
+        { id: 'OSC-001', name: 'Oscilloscope', status: 'Available', occupiedBy: null },
+        { id: 'PSU-001', name: 'Power Supply', status: 'In-Use', occupiedBy: 'S002' },
+        { id: 'FGEN-001', name: 'Function Generator', status: 'Available', occupiedBy: null },
+        { id: 'DMM-001', name: 'Multimeter', status: 'Maintenance', occupiedBy: null },
+    ];
+    
+    const allReports = [
+        { id: 'R01', studentId: 'S001', class: 'Image Processing', status: 'Pending', date: '2025-08-10' },
+        { id: 'R02', studentId: 'S009', class: 'DBMS Lab', status: 'Pending', date: '2025-08-10' },
+        { id: 'R03', studentId: 'S017', class: 'Big Data Lab', status: 'Graded', date: '2025-08-11' },
+        { id: 'R04', studentId: 'S025', class: 'Instrumentation Lab', status: 'Pending', date: '2025-08-11' },
+        { id: 'R05', studentId: 'S002', class: 'Image Processing', status: 'Graded', date: '2025-08-12' },
+        { id: 'R06', studentId: 'S010', class: 'DBMS Lab', status: 'Pending', date: '2025-08-13' },
+    ];
+
+    const maintenanceLog = [
+        { equipId: 'DAQ-01', issue: 'No output signal', reportedBy: 'Dr. Sharma', status: 'Pending' },
+        { equipId: 'DMM-001', issue: 'Screen flickering', reportedBy: 'Ravi Kumar', status: 'In Progress' }
+    ];
+
+    /* =========================
+       INITIALIZATION & THEME
+       ========================= */
+    function init() {
+        setupTheme();
+        renderAll();
+        // Simulate live updates for the tracker
+        setInterval(simulateLiveUpdate, 5000);
+    }
+
+    function setupTheme() {
+        const themeToggle = document.getElementById('themeToggle');
+        const applyTheme = (theme) => {
+            document.documentElement.classList.toggle('light', theme === 'light');
+        };
+        applyTheme(localStorage.getItem('smartlab-theme'));
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.classList.toggle('light');
+            localStorage.setItem('smartlab-theme', isLight ? 'light' : 'dark');
+        });
+    }
+
+    /* =========================
+       RENDERING FUNCTIONS
+       ========================= */
+    function renderAll() {
+        renderLiveTracker();
+        renderReports();
+        renderMaintenance();
+    }
+
+    function renderLiveTracker() {
+        const grid = document.getElementById('equipment-grid');
+        grid.innerHTML = '';
+        equipment.forEach(item => {
+            const card = document.createElement('div');
+            const student = students.find(s => s.id === item.occupiedBy);
+            const statusClass = item.status.toLowerCase().replace('-', '');
+            
+            card.className = `equipment-card status-${statusClass}`;
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-weight:700;">${item.name} (${item.id})</div>
+                    <div class="status-badge status-${statusClass}">${item.status}</div>
+                </div>
+                <div class="kv" style="margin-top:8px;">
+                    Occupied By: <strong>${student ? student.name : 'N/A'}</strong>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function renderReports() {
+        const tbody = document.getElementById('reports-tbody');
+        tbody.innerHTML = '';
+        allReports.forEach(report => {
+            const student = students.find(s => s.id === report.studentId);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${report.id}</td>
+                <td>${student ? student.name : 'Unknown'}</td>
+                <td>${report.class}</td>
+                <td><span class="status-badge status-${report.status.toLowerCase()}">${report.status}</span></td>
+                <td>${report.date}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderMaintenance() {
+        const tbody = document.getElementById('maintenance-tbody');
+        tbody.innerHTML = '';
+        maintenanceLog.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.equipId}</td>
+                <td>${item.issue}</td>
+                <td>${item.reportedBy}</td>
+                <td><span class="status-badge status-maintenance">${item.status}</span></td>
+                <td><button class="btn btn-ghost" onclick="alert('Updating status for ${item.equipId}')">Update</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* =========================
+       LIVE SIMULATION
+       ========================= */
+    function simulateLiveUpdate() {
+        // Randomly free up one piece of equipment
+        const inUseItems = equipment.filter(e => e.status === 'In-Use');
+        if (inUseItems.length > 0) {
+            const itemToFree = inUseItems[Math.floor(Math.random() * inUseItems.length)];
+            itemToFree.status = 'Available';
+            itemToFree.occupiedBy = null;
+        }
+
+        // Randomly assign one free piece of equipment to a student
+        const availableItems = equipment.filter(e => e.status === 'Available');
+        if (availableItems.length > 0) {
+            const itemToOccupy = availableItems[Math.floor(Math.random() * availableItems.length)];
+            const randomStudent = students[Math.floor(Math.random() * students.length)];
+            itemToOccupy.status = 'In-Use';
+            itemToOccupy.occupiedBy = randomStudent.id;
+        }
+        
+        // Re-render only the live tracker
+        renderLiveTracker();
+    }
+
+    /* =========================
+       TAB NAVIGATION
+       ========================= */
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
+        btn.setAttribute('aria-selected', 'true');
+        document.querySelectorAll('.tab-panel').forEach(p => {
+            p.classList.toggle('hidden', p.id !== `panel-${btn.dataset.tab}`);
+            if (p.id === `panel-${btn.dataset.tab}`) {
+                setTimeout(() => p.classList.add('show'), 10);
+            } else {
+                p.classList.remove('show');
+            }
+        });
+    }));
+
+    // Initialize
+    init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Labs - SmartLab</title>
+
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    <meta name="theme-color" content="#0b2340">
+
+    <!-- Integrated CSS -->
+    <style>
+        /* ===============================
+           ROOT THEME VARIABLES (from index.html)
+           =============================== */
+        :root {
+            --bg-900: #071021;
+            --bg-800: #0b2540;
+            --surface: #0f2b48;
+            --muted: #98a6b3;
+            --text: #eaf3ff;
+            --accent-blue: #4f8cff;
+            --accent-purple: #8b5cf6;
+            --accent-green: #34d399;
+            --accent-red: #ff6b6b;
+            --accent-yellow: #ffd166;
+            --glass: rgba(255, 255, 255, 0.03);
+            --radius: 14px;
+            --ease: cubic-bezier(.2, .9, .3, 1);
+            --container: 1280px;
+        }
+
+        html.light {
+            --bg-900: #f7fbff;
+            --bg-800: #eef6ff;
+            --surface: #ffffff;
+            --muted: #6b7280;
+            --text: #0b2340;
+            --glass: rgba(0, 0, 0, 0.04);
+        }
+
+        /* ===============================
+           RESET & BASE
+           =============================== */
+        * {
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-blue) var(--bg-900);
+        }
+        
+        *::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: var(--bg-900);
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background-color: var(--accent-blue);
+            border-radius: 10px;
+            border: 2px solid var(--bg-900);
+        }
+
+        body {
+            margin: 0;
+            font-family: "Roboto", sans-serif;
+            background: var(--bg-800);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===============================
+           HEADER/NAVBAR
+           =============================== */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1200;
+            backdrop-filter: blur(6px);
+            background: linear-gradient(180deg, rgba(8, 12, 20, 0.6), rgba(8, 12, 20, 0.35));
+            border-bottom: 1px solid var(--glass);
+        }
+
+        html.light header {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .navbar {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: #fff;
+            font-weight: 800;
+            font-family: "Poppins";
+        }
+        
+        .btn {
+            border: 0; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 700;
+            transition: transform 160ms var(--ease), box-shadow 160ms var(--ease);
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg,var(--accent-blue), var(--accent-purple));
+            color:#fff;
+        }
+        .btn-ghost {
+            background: transparent; color:var(--text); border:1px solid var(--glass);
+        }
+
+        /* ===============================
+           PAGE STRUCTURE & VIEWS
+           =============================== */
+        .page-view {
+            display: none;
+            padding: 30px 0;
+            animation: fadeIn 0.5s var(--ease);
+        }
+        .page-view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            font-family: "Poppins", sans-serif;
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .breadcrumb {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: var(--muted);
+        }
+        .breadcrumb a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        .breadcrumb .separator {
+            margin: 0 8px;
+        }
+
+        /* ===============================
+           DISCIPLINE & SUBJECT CARDS
+           =============================== */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .discipline-card, .subject-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--glass);
+            transition: all 0.3s var(--ease);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .discipline-card:hover, .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            border-color: var(--accent-blue);
+        }
+
+        .card-icon {
+            font-size: 32px;
+            color: var(--accent-green);
+            margin-bottom: 16px;
+        }
+        
+        .card-title {
+            font-family: "Poppins", sans-serif;
+            font-size: 20px;
+            margin: 0 0 8px 0;
+        }
+
+        .card-description {
+            color: var(--muted);
+            font-size: 15px;
+            flex-grow: 1;
+        }
+        
+        .card-footer {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        /* ===============================
+           EXPERIMENT LIST VIEW
+           =============================== */
+        .experiment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .experiment-item {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px 24px;
+            border: 1px solid var(--glass);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s var(--ease);
+        }
+        
+        .experiment-item:hover {
+            background: var(--bg-900);
+        }
+        
+        .experiment-info h4 {
+            font-family: "Poppins", sans-serif;
+            margin: 0 0 4px 0;
+        }
+        
+        .experiment-info p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* ===============================
+           VIRTUAL LAB INTERFACE
+           =============================== */
+        .lab-interface-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            height: calc(100vh - 150px);
+        }
+
+        .lab-sidebar {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: 1px solid var(--glass);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .lab-sidebar h3 {
+            font-family: "Poppins";
+            margin: 0 0 16px 0;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass);
+        }
+
+        .lab-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .lab-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s var(--ease);
+        }
+        
+        .lab-nav-item:hover {
+            background: var(--glass);
+        }
+        
+        .lab-nav-item.active {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .lab-nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .lab-main-content {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--glass);
+            overflow-y: auto;
+            padding: 24px 32px;
+        }
+        
+        .lab-content-panel {
+            display: none;
+            animation: fadeIn 0.4s var(--ease);
+        }
+        
+        .lab-content-panel.active {
+            display: block;
+        }
+        
+        .lab-content-panel h2, .lab-content-panel h3 {
+            font-family: "Poppins";
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--glass);
+        }
+        
+        .lab-content-panel h3 {
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: none;
+        }
+        
+        .lab-content-panel pre {
+            background: var(--bg-900);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--glass);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+        
+        .lab-content-panel code {
+            font-family: 'Courier New', Courier, monospace;
+            background: var(--glass);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+        
+        .lab-content-panel ul {
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+        
+        /* ===============================
+           SIMULATION SPECIFIC STYLES
+           =============================== */
+        .simulation-container {
+            border: 1px solid var(--glass);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-top: 20px;
+        }
+        
+        .sim-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .sim-canvas-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: var(--bg-900);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .form-control {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--glass);
+            background: var(--bg-900);
+            color: var(--text);
+            font-family: inherit;
+        }
+        
+        /* Data Structures Sim */
+        .bar-chart-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 100%;
+            gap: 2px;
+            padding: 10px;
+        }
+        .bar {
+            width: 10px;
+            background-color: var(--accent-blue);
+            transition: height 0.3s ease, background-color 0.3s ease;
+            position: relative;
+        }
+        .bar.compare { background-color: var(--accent-yellow); }
+        .bar.swap { background-color: var(--accent-red); }
+        .bar.sorted { background-color: var(--accent-green); }
+
+        /* Digital Logic Sim */
+        #dl-sim-container {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            background: var(--bg-900);
+            border-radius: 8px;
+            overflow: auto;
+            touch-action: none;
+        }
+        .gate, .switch, .led {
+            position: absolute;
+            border: 1px solid var(--muted);
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: grab;
+            user-select: none;
+            text-align: center;
+            min-width: 60px;
+        }
+        .gate:active, .switch:active, .led:active { cursor: grabbing; }
+        .connector {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            border: 1px solid var(--muted);
+            cursor: crosshair;
+            z-index: 10;
+        }
+        .input { left: -7px; }
+        .output { right: -7px; }
+        .input-1 { top: 30%; }
+        .input-2 { top: 70%; }
+        .output-1 { top: 50%; }
+        #dl-sim-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 200%; height: 200%;
+            pointer-events: none;
+        }
+        .led.on { background: var(--accent-yellow); box-shadow: 0 0 15px var(--accent-yellow); }
+        .switch.on { background: var(--accent-green); }
+
+        /* DBMS Sim */
+        #dbms-output {
+            margin-top: 16px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        #dbms-output th, #dbms-output td {
+            border: 1px solid var(--glass);
+            padding: 8px;
+            text-align: left;
+        }
+        #dbms-output th {
+            background-color: var(--bg-900);
+        }
+
+        /* OS Sim */
+        #gantt-chart {
+            display: flex;
+            height: 50px;
+            background: var(--bg-900);
+            border: 1px solid var(--glass);
+            margin-top: 10px;
+        }
+        .gantt-block {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-right: 1px solid var(--glass);
+        }
+        .process-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .process-table th, .process-table td {
+            border: 1px solid var(--glass);
+            padding: 8px;
+            text-align: center;
+        }
+        .process-table th {
+            background: var(--bg-900);
+        }
+
+        /* ===============================
+           QUIZ STYLES
+           =============================== */
+        .quiz-question {
+            margin-bottom: 24px;
+        }
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .quiz-option {
+            background: var(--bg-900);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid var(--glass);
+        }
+        .quiz-option:hover {
+            border-color: var(--accent-blue);
+        }
+        .quiz-option.correct {
+            background-color: rgba(52, 211, 153, 0.2);
+            border-color: var(--accent-green);
+        }
+        .quiz-option.incorrect {
+            background-color: rgba(255, 107, 107, 0.2);
+            border-color: var(--accent-red);
+        }
+        #quiz-feedback {
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        
+        /* ===============================
+           RESPONSIVE
+           =============================== */
+        @media (max-width: 992px) {
+            .lab-interface-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            .lab-sidebar {
+                height: auto;
+                overflow-x: auto;
+            }
+            .lab-main-content {
+                min-height: 500px;
+            }
+        }
+        @media (max-width: 600px) {
+            .page-title { font-size: 28px; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container navbar">
+            <a href="#" class="brand" id="home-link">
+                <div class="logo">SL</div>
+                <div>
+                    <div style="font-weight:700;">Smart Lab System</div>
+                    <div style="font-size:12px; color: var(--muted);">Virtual Labs</div>
+                </div>
+            </a>
+            <div>
+                <button id="themeToggle" class="btn btn-ghost" title="Toggle Theme"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
+                <a href="index.html" class="btn btn-primary" style="margin-left: 10px;">Portal Home</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+        <div class="container">
+            <!-- View 1: Discipline Selection -->
+            <div id="discipline-view" class="page-view active">
+                <h1 class="page-title">Select a Discipline</h1>
+                <div id="discipline-grid" class="card-grid">
+                    <!-- Disciplines will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- View 2: Subject Selection -->
+            <div id="subject-view" class="page-view">
+                <div id="subject-breadcrumb" class="breadcrumb"></div>
+                <h1 id="subject-page-title" class="page-title"></h1>
+                <div id="subject-grid" class="card-grid">
+                    <!-- Subjects will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- View 3: Experiment List -->
+            <div id="experiment-view" class="page-view">
+                <div id="experiment-breadcrumb" class="breadcrumb"></div>
+                <h1 id="experiment-page-title" class="page-title"></h1>
+                <div id="experiment-list" class="experiment-list">
+                    <!-- Experiments will be dynamically inserted here -->
+                </div>
+            </div>
+            
+            <!-- View 4: Virtual Lab Interface -->
+            <div id="lab-view" class="page-view">
+                 <div id="lab-breadcrumb" class="breadcrumb"></div>
+                 <div class="lab-interface-grid">
+                     <!-- Lab Sidebar -->
+                     <aside class="lab-sidebar">
+                         <h3 id="lab-sidebar-title">Lab Menu</h3>
+                         <nav id="lab-nav" class="lab-nav">
+                             <!-- Nav items will be dynamically inserted here -->
+                         </nav>
+                     </aside>
+                     <!-- Lab Main Content -->
+                     <section id="lab-main-content" class="lab-main-content">
+                         <!-- Content panels will be dynamically inserted here -->
+                     </section>
+                 </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Integrated JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ===================================================================================
+        // VIRTUAL LABS DATA STORE
+        // ===================================================================================
+        const virtualLabsData = {
+            "cs": {
+                name: "Computer Science & Engineering",
+                icon: "fa-solid fa-laptop-code",
+                subjects: {
+                    "ds": {
+                        name: "Data Structures",
+                        description: "Explore fundamental data structures like arrays, stacks, queues, trees, and graphs.",
+                        experiments: [
+                            { id: "ds01", name: "Array Sorting Algorithms", description: "Visualize Bubble Sort, and Quick Sort." },
+                            { id: "ds02", name: "Stack Operations", description: "Simulate push, pop, and peek operations on a stack." },
+                            { id: "ds03", name: "Queue Operations", description: "Simulate enqueue and dequeue operations on a queue." },
+                            { id: "ds04", name: "Binary Search Tree", description: "Interactive BST for insertion, deletion, and traversal." },
+                            { id: "ds05", name: "Graph Traversal (BFS & DFS)", description: "Visualize Breadth-First and Depth-First Search." }
+                        ]
+                    },
+                    "dbms": {
+                        name: "Database Management Systems",
+                        description: "Learn SQL and database concepts with interactive query simulations.",
+                        experiments: [
+                            { id: "dbms01", name: "SQL SELECT & WHERE", description: "Practice basic data retrieval and filtering." },
+                            { id: "dbms02", name: "SQL JOIN Operations", description: "Combine data from multiple tables using INNER and LEFT JOINs." },
+                            { id: "dbms03", name: "SQL Aggregate Functions", description: "Use COUNT, SUM, AVG with GROUP BY." },
+                            { id: "dbms04", name: "Data Definition Language (DDL)", description: "Learn to CREATE, ALTER, and DROP tables." }
+                        ]
+                    },
+                    "os": {
+                        name: "Operating Systems",
+                        description: "Simulate core OS concepts like CPU scheduling and memory management.",
+                        experiments: [
+                            { id: "os01", name: "CPU Scheduling Algorithms", description: "Compare FCFS, SJF, and Round Robin scheduling." },
+                            { id: "os02", name: "Banker's Algorithm", description: "Simulate deadlock avoidance with the Banker's algorithm." }
+                        ]
+                    },
+                     "cn": {
+                        name: "Computer Networks",
+                        description: "Visualize networking concepts like IP addressing and routing.",
+                        experiments: [
+                            { id: "cn01", name: "IP Subnetting Calculator", description: "Practice dividing networks into subnets." },
+                            { id: "cn02", name: "Dijkstra's Routing Algorithm", description: "Find the shortest path in a network topology." }
+                        ]
+                    }
+                }
+            },
+            "ec": {
+                name: "Electronics & Computer Science",
+                icon: "fa-solid fa-microchip",
+                subjects: {
+                    "dl": {
+                        name: "Digital Circuits & System Design",
+                        description: "Build and test digital circuits with logic gates, adders, and flip-flops.",
+                        experiments: [
+                            { id: "dl01", name: "Basic Logic Gates", description: "Verify truth tables for AND, OR, NOT, NAND, NOR, XOR." },
+                            { id: "dl02", name: "Half and Full Adder", description: "Construct and simulate binary adder circuits." },
+                            { id: "dl03", name: "SR and JK Flip-Flops", description: "Understand the behavior of basic memory elements." },
+                            { id: "dl04", name: "4-to-1 Multiplexer", description: "Design and test a multiplexer circuit." }
+                        ]
+                    },
+                    "aec": {
+                        name: "Analog Electronics Circuits",
+                        description: "Simulate and analyze basic analog electronic circuits.",
+                        experiments: [
+                            { id: "aec01", name: "Diode Clipper & Clamper", description: "Observe waveform shaping using diodes." },
+                            { id: "aec02", name: "RC Filter Analysis", description: "Analyze the frequency response of simple filters." },
+                            { id: "aec03", name: "Op-Amp Inverting Amplifier", description: "Design and test an inverting operational amplifier." }
+                        ]
+                    },
+                    "mpmc": {
+                        name: "Microprocessors & Microcontrollers",
+                        description: "Learn assembly language programming for the 8051 microcontroller.",
+                        experiments: [
+                            { id: "mpmc01", name: "8051 Arithmetic Operations", description: "Write assembly code for addition and subtraction." },
+                            { id: "mpmc02", name: "8051 Data Transfer", description: "Move data between registers and memory." }
+                        ]
+                    },
+                    "csdf": {
+                        name: "Cyber Security & Digital Forensics",
+                        description: "Learn about cyber attacks, security tools, and forensic analysis techniques.",
+                        experiments: [
+                            { id: "csdf01", name: "User Account and Password Security", description: "Learn to protect a personal computer system." },
+                            { id: "csdf02", name: "Document Protection", description: "Study methods to protect Microsoft Word documents." },
+                            { id: "csdf03", name: "Database Security", description: "Explore methods for protecting and securing databases." },
+                            { id: "csdf04", name: "Password Cracking Techniques", description: "Understand strong passwords and cracking methods." },
+                            { id: "csdf05", name: "Web Browser Security", description: "Analyze browser security and useful add-ons." },
+                            { id: "csdf06", name: "Cryptography using PGP", description: "Learn to use Pretty Good Privacy for encryption." },
+                            { id: "csdf07", name: "Steganography", description: "Hide data within image files using steganography tools." },
+                            { id: "csdf08", name: "Email Security Analysis", description: "Perform email header analysis to trace origins." },
+                            { id: "csdf09", name: "Mobile Security", description: "Explore security apps and smartphone encryption." },
+                            { id: "csdf10", name: "Ethical Hacking: Information Gathering", description: "Use tools like Nmap, Whois, and Nslookup." },
+                            { id: "csdf11", name: "Data Asset Protection", description: "Learn to recover and protect files using Recuva." },
+                            { id: "csdf12", name: "Forensic Image Analysis", description: "Analyze disk images with FTK Imager and Autopsy." },
+                            { id: "csdf13", name: "Kali Linux Forensic Tools", description: "Use dd and dcfldd for data acquisition." },
+                            { id: "csdf14", name: "Data Carving", description: "Recover deleted files using Foremost and Scalpel." },
+                            { id: "csdf15", name: "Penetration Testing with Metasploit", description: "Perform a basic penetration test in a simulated environment." }
+                        ]
+                    }
+                }
+            },
+            "ee": {
+                name: "Electrical Engineering",
+                icon: "fa-solid fa-bolt",
+                subjects: {
+                    "bee": {
+                        name: "Basic Electrical Engineering",
+                        description: "Explore fundamental laws and theorems of electrical circuits.",
+                        experiments: [
+                            { id: "bee01", name: "Ohm's Law Verification", description: "An interactive circuit to verify V=IR." },
+                            { id: "bee02", name: "Thevenin's Theorem", description: "Simplify a complex circuit to its Thevenin equivalent." },
+                            { id: "bee03", name: "RLC Series Resonance", description: "Observe the resonance phenomenon in an AC circuit." }
+                        ]
+                    }
+                }
+            },
+            "me": {
+                name: "Mechanical Engineering",
+                icon: "fa-solid fa-gears",
+                subjects: {
+                    "som": {
+                        name: "Strength of Materials",
+                        description: "Analyze stress, strain, and deformation in materials.",
+                        experiments: [
+                            { id: "som01", name: "Tensile Test Simulation", description: "Study the stress-strain curve for various materials." },
+                            { id: "som02", name: "Beam Bending Analysis", description: "Visualize deflection and stress in beams under load." }
+                        ]
+                    },
+                    "thermo": {
+                        name: "Thermodynamics",
+                        description: "Simulate and analyze thermodynamic cycles.",
+                        experiments: [
+                            { id: "thermo01", name: "Carnot Cycle Simulator", description: "Understand the most efficient heat engine cycle." }
+                        ]
+                    }
+                }
+            },
+            "ae": {
+                name: "Automobile Engineering",
+                icon: "fa-solid fa-car",
+                subjects: {
+                    "ice": {
+                        name: "IC Engines",
+                        description: "Explore the workings of internal combustion engines.",
+                        experiments: [
+                            { id: "ice01", name: "Four-Stroke Engine Animation", description: "Visualize the intake, compression, power, and exhaust strokes." }
+                        ]
+                    },
+                    "vd": {
+                        name: "Vehicle Dynamics",
+                        description: "Simulate and analyze vehicle motion and stability.",
+                        experiments: [
+                            { id: "vd01", name: "Suspension System Simulation", description: "Compare different suspension types." }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const experimentContent = {
+            // --- DATA STRUCTURES CONTENT ---
+            "ds01": {
+                aim: "To understand and visualize the working of various array sorting algorithms.",
+                theory: `<h3>Sorting Algorithms</h3>
+<p>Sorting is a fundamental algorithm in computer science that arranges elements of a list in a certain order. This lab focuses on common comparison-based sorting algorithms:</p>
+<ul>
+    <li><strong>Bubble Sort:</strong> A simple algorithm that repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order. It has a time complexity of O(n²).</li>
+    <li><strong>Quick Sort:</strong> A highly efficient divide-and-conquer algorithm. It picks an element as a pivot and partitions the given array around the picked pivot. Its average time complexity is O(n log n).</li>
+</ul>`,
+                procedure: `1. Select a sorting algorithm from the dropdown menu.
+2. Click 'Generate New Array' to create a random set of bars.
+3. Click 'Sort' to start the visualization.
+4. Observe how the algorithm works. Colors indicate status: blue (default), yellow (comparing), red (swapping), and green (sorted).`,
+                simulation: `<div class="simulation-container">
+    <div class="sim-controls">
+        <select id="sort-algorithm-select" class="btn btn-ghost">
+            <option value="bubble">Bubble Sort</option>
+            <option value="quick">Quick Sort</option>
+        </select>
+        <button id="generate-array-btn" class="btn btn-ghost">Generate New Array</button>
+        <button id="sort-btn" class="btn btn-primary">Sort</button>
+        <label for="speed-slider">Speed:</label>
+        <input type="range" id="speed-slider" min="10" max="500" value="100">
+    </div>
+    <div class="sim-canvas-container bar-chart-container" id="ds-sim-container"></div>
+</div>`,
+                quiz: [
+                    { q: "Which sorting algorithm has the worst-case time complexity of O(n^2)?", o: ["Merge Sort", "Quick Sort", "Bubble Sort"], a: 2 },
+                    { q: "What is the average time complexity of Quick Sort?", o: ["O(n^2)", "O(n log n)", "O(n)"], a: 1 }
+                ],
+                references: `<p>1. "Introduction to Algorithms" by Cormen, et al.</p>`
+            },
+            "ds02": {
+                aim: "To understand the Last-In, First-Out (LIFO) principle of a Stack data structure.",
+                theory: `<h3>Stack Data Structure</h3>
+<p>A stack is a linear data structure that follows a particular order in which the operations are performed. The order is LIFO (Last-In, First-Out). It is named stack as it behaves like a real-world stack, for example – a deck of cards or a pile of plates.</p>
+<ul>
+    <li><strong>push:</strong> Adds an item to the top of the stack.</li>
+    <li><strong>pop:</strong> Removes the item from the top of the stack.</li>
+    <li><strong>peek (or top):</strong> Returns the top element of the stack without removing it.</li>
+</ul>`,
+                procedure: `1. Use the input field and the 'Push' button to add elements to the stack.
+2. Click the 'Pop' button to remove the top element.
+3. Observe how the stack visualization changes. The last element added is always the first one to be removed.`,
+                simulation: `<div class="simulation-container">...Stack Simulation UI...</div>`,
+                quiz: [{ q: "A stack follows which principle?", o: ["FIFO", "LIFO", "LILO"], a: 1 }],
+                references: `<p>1. GeeksforGeeks: Stack Data Structure</p>`
+            },
+            // --- DIGITAL LOGIC CONTENT ---
+            "dl01": {
+                aim: "To understand the functionality of basic digital logic gates and verify their truth tables.",
+                theory: `<h3>Basic Logic Gates</h3>
+<p>Logic gates are the fundamental building blocks of digital systems. They perform basic logical functions based on Boolean algebra. This experiment covers the primary gates:</p>
+<ul>
+    <li><strong>AND Gate:</strong> Output is 1 only if all inputs are 1.</li>
+    <li><strong>OR Gate:</strong> Output is 1 if at least one input is 1.</li>
+    <li><strong>NOT Gate (Inverter):</strong> Output is the inverse of the input.</li>
+    <li><strong>NAND Gate:</strong> A universal gate, equivalent to NOT-AND.</li>
+    <li><strong>XOR Gate (Exclusive OR):</strong> Output is 1 if inputs are different.</li>
+</ul>`,
+                procedure: `1. Drag components (Switches, Gates, LED) onto the simulation area.
+2. Connect components by clicking an output connector then an input connector.
+3. Double-click a switch to toggle its state (0 or 1).
+4. Observe the LED output. A lit LED is a logical 1.
+5. Verify the truth table for each gate. Right-click to delete components or wires.`,
+                simulation: `<div class="simulation-container">
+    <div class="sim-controls">
+        <strong>Components:</strong>
+        <button class="btn btn-ghost" data-type="switch">Switch</button>
+        <button class="btn btn-ghost" data-type="gate" data-gate="AND">AND</button>
+        <button class="btn btn-ghost" data-type="gate" data-gate="OR">OR</button>
+        <button class="btn btn-ghost" data-type="gate" data-gate="NOT">NOT</button>
+        <button class="btn btn-ghost" data-type="gate" data-gate="NAND">NAND</button>
+        <button class="btn btn-ghost" data-type="gate" data-gate="XOR">XOR</button>
+        <button class="btn btn-ghost" data-type="led">LED</button>
+        <button id="clear-dl-sim" class="btn btn-primary" style="background: var(--accent-red);">Clear</button>
+    </div>
+    <div id="dl-sim-container">
+        <svg id="dl-sim-svg"></svg>
+    </div>
+</div>`,
+                quiz: [
+                    { q: "A NAND gate is equivalent to an AND gate followed by a...", o: ["OR gate", "NOT gate", "XOR gate"], a: 1 },
+                    { q: "Which gate is known as a universal gate?", o: ["AND", "OR", "NAND"], a: 2 }
+                ],
+                references: `<p>1. "Digital Design" by M. Morris Mano.</p>`
+            },
+            // --- DBMS CONTENT ---
+            "dbms01": {
+                aim: "To learn and practice writing basic SQL SELECT queries to retrieve and filter data from a database table.",
+                theory: `<h3>SQL SELECT & WHERE</h3>
+<p>The <code>SELECT</code> statement retrieves data from a database. The <code>WHERE</code> clause is used to filter records and extract only those that fulfill a specific condition.</p>
+<pre><code>SELECT column1, column2, ...
+FROM table_name
+WHERE condition;</code></pre>
+<p>We will use a sample 'Employees' table with columns: <code>EmployeeID, FirstName, LastName, Department, Salary</code>.</p>`,
+                procedure: `1. Review the schema of the 'Employees' table.
+2. Write a SQL query in the text area.
+3. Click 'Run Query' to execute it.
+4. Try different queries, e.g., <code>SELECT * FROM Employees WHERE Department = 'Sales';</code> or <code>SELECT FirstName, Salary FROM Employees WHERE Salary > 60000;</code>`,
+                simulation: `<div class="simulation-container">
+    <h4>Sample Table: Employees</h4>
+    <p>Columns: EmployeeID, FirstName, LastName, Department, Salary</p>
+    <div class="sim-controls">
+        <textarea id="sql-query-input" rows="4" style="width: 100%;" class="form-control" placeholder="SELECT * FROM Employees;"></textarea>
+    </div>
+    <button id="run-sql-btn" class="btn btn-primary">Run Query</button>
+    <h4 style="margin-top: 20px;">Query Result:</h4>
+    <div id="dbms-sim-container">
+        <table id="dbms-output"></table>
+    </div>
+</div>`,
+                quiz: [
+                    { q: "Which keyword selects all columns from a table?", o: ["ALL", "GET", "*"], a: 2 },
+                    { q: "The WHERE clause is used for...", o: ["Sorting records", "Filtering records", "Grouping records"], a: 1 }
+                ],
+                references: `<p>1. W3Schools SQL Tutorial</p>`
+            },
+            // --- OS CONTENT ---
+            "os01": {
+                aim: "To understand and compare different CPU scheduling algorithms.",
+                theory: `<h3>CPU Scheduling</h3>
+<p>CPU scheduling is a process which allows one process to use the CPU while the execution of another process is on hold (in waiting state) due to unavailability of any resource like I/O etc, thereby making full use of CPU. The main objective of CPU scheduling is to make sure that whenever the CPU remains idle, the OS at least selects one of the processes available in the ready queue for execution.</p>
+<ul>
+    <li><strong>First-Come, First-Served (FCFS):</strong> The process that requests the CPU first is allocated the CPU first.</li>
+    <li><strong>Shortest Job First (SJF):</strong> The process with the smallest execution time is selected for execution next. Can be preemptive or non-preemptive.</li>
+    <li><strong>Round Robin (RR):</strong> Each process gets a small unit of CPU time (a time quantum). After this time has elapsed, the process is pre-empted and added to the end of the ready queue.</li>
+</ul>`,
+                procedure: `1. Add processes by specifying their Arrival Time and Burst Time.
+2. For Round Robin, specify the Time Quantum.
+3. Select the scheduling algorithm you want to visualize.
+4. Click 'Run Simulation' to see the Gantt chart and calculate the average waiting and turnaround times.`,
+                simulation: `<div class="simulation-container">
+    <h3>Process Input</h3>
+    <div class="sim-controls">
+        <input type="number" id="arrival-time" placeholder="Arrival Time" class="form-control" style="width: 120px;">
+        <input type="number" id="burst-time" placeholder="Burst Time" class="form-control" style="width: 120px;">
+        <button id="add-process-btn" class="btn btn-ghost">Add Process</button>
+    </div>
+    <div class="sim-controls">
+        <select id="scheduling-algo" class="btn btn-ghost">
+            <option value="fcfs">First-Come, First-Served</option>
+            <option value="sjf">Shortest Job First (Non-Preemptive)</option>
+            <option value="rr">Round Robin</option>
+        </select>
+        <input type="number" id="time-quantum" placeholder="Time Quantum (for RR)" class="form-control" style="width: 180px; display: none;">
+        <button id="run-os-sim-btn" class="btn btn-primary">Run Simulation</button>
+    </div>
+    <h3>Process Table</h3>
+    <table class="process-table">
+        <thead><tr><th>Process ID</th><th>Arrival Time</th><th>Burst Time</th></tr></thead>
+        <tbody id="process-table-body"></tbody>
+    </table>
+    <h3 style="margin-top: 20px;">Gantt Chart</h3>
+    <div id="gantt-chart"></div>
+    <div id="os-results" style="margin-top: 20px;"></div>
+</div>`,
+                quiz: [{ q: "Which scheduling algorithm can lead to starvation for long processes?", o: ["FCFS", "SJF", "Round Robin"], a: 1 }],
+                references: `<p>1. "Operating System Concepts" by Silberschatz, Galvin, and Gagne.</p>`
+            },
+             // --- MECHANICAL ENGINEERING CONTENT ---
+            "som01": {
+                aim: "To study the stress-strain relationship of different materials under tensile load and determine key mechanical properties.",
+                theory: `<h3>Tensile Testing</h3>
+<p>The tensile test is a fundamental materials science and engineering test in which a sample is subjected to a controlled tension until failure. Properties that are directly measured via a tensile test are ultimate tensile strength, maximum elongation and reduction in area. From these measurements, properties such as Young's modulus, Poisson's ratio, yield strength, and strain-hardening characteristics can also be determined.</p>
+<ul>
+    <li><strong>Stress (σ):</strong> The force applied per unit of cross-sectional area.</li>
+    <li><strong>Strain (ε):</strong> The measure of the deformation of the material.</li>
+    <li><strong>Young's Modulus (E):</strong> A measure of the stiffness of a material, calculated as the slope of the linear portion of the stress-strain curve.</li>
+    <li><strong>Yield Point:</strong> The point on the stress-strain curve that indicates the limit of elastic behavior and the beginning of plastic deformation.</li>
+    <li><strong>Ultimate Tensile Strength (UTS):</strong> The maximum stress a material can withstand while being stretched or pulled before necking.</li>
+</ul>`,
+                procedure: `1. Select a material (e.g., Mild Steel, Aluminum, Copper) from the dropdown menu.
+2. Click the 'Start Test' button to begin applying a virtual tensile load.
+3. Observe the animation of the specimen elongating and eventually fracturing.
+4. Simultaneously, watch the real-time plot of the Stress vs. Strain curve.
+5. Key points like the Yield Point and UTS will be marked on the graph as they are reached.
+6. After the test, the calculated mechanical properties for the selected material will be displayed.`,
+                simulation: `<div class="simulation-container">
+    <div class="sim-controls">
+        <select id="material-select" class="btn btn-ghost">
+            <option value="steel">Mild Steel</option>
+            <option value="aluminum">Aluminum</option>
+            <option value="copper">Copper</option>
+        </select>
+        <button id="start-tensile-test-btn" class="btn btn-primary">Start Test</button>
+    </div>
+    <div class="content-grid">
+        <div id="tensile-specimen-container" style="border: 1px solid var(--glass); border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: center; min-height: 200px;">
+            <!-- Specimen animation will go here -->
+        </div>
+        <div id="stress-strain-chart-container" class="sim-canvas-container" style="aspect-ratio: 1/1;">
+            <canvas id="stress-strain-chart"></canvas>
+        </div>
+    </div>
+    <div id="tensile-results" style="margin-top: 20px;"></div>
+</div>`,
+                quiz: [
+                    { q: "The slope of the initial, linear portion of the stress-strain curve represents:", o: ["Yield Strength", "Ultimate Tensile Strength", "Young's Modulus"], a: 2 },
+                    { q: "The region of the stress-strain curve where the material returns to its original shape after load removal is called:", o: ["Plastic Region", "Elastic Region", "Fracture Region"], a: 1 }
+                ],
+                references: `<p>1. "Mechanics of Materials" by R.C. Hibbeler.</p>`
+            },
+            // --- AUTOMOBILE ENGINEERING CONTENT ---
+            "ice01": {
+                aim: "To understand the working principle and sequence of operations in a four-stroke spark-ignition (SI) internal combustion engine.",
+                theory: `<h3>Four-Stroke Engine Cycle</h3>
+<p>The vast majority of internal combustion engines use a four-stroke cycle. The four strokes refer to intake, compression, combustion (power), and exhaust strokes that occur during two crankshaft revolutions.</p>
+<ol>
+    <li><strong>Intake Stroke:</strong> The piston moves down, and the intake valve opens, drawing a mixture of fuel and air into the cylinder.</li>
+    <li><strong>Compression Stroke:</strong> The intake valve closes, and the piston moves up, compressing the fuel-air mixture.</li>
+    <li><strong>Power (Combustion) Stroke:</strong> The spark plug ignites the compressed mixture, forcing the piston down and producing power.</li>
+    <li><strong>Exhaust Stroke:</strong> The exhaust valve opens, and the piston moves up, pushing the burnt gases out of thecylinder.</li>
+</ol>
+<p>This cycle repeats continuously to power the vehicle.</p>`,
+                procedure: `1. Use the 'Play/Pause' button to control the animation.
+2. Use the speed slider to adjust the engine's RPM (revolutions per minute).
+3. Observe the movement of the piston, crankshaft, connecting rod, and the opening/closing of the intake and exhaust valves.
+4. The current stroke is highlighted. Follow the sequence to understand the complete cycle.`,
+                simulation: `<div class="simulation-container">
+    <div class="sim-controls">
+        <button id="ice-play-pause-btn" class="btn btn-primary"><i class="fa-solid fa-play"></i> Play</button>
+        <label for="ice-speed-slider">Speed (RPM):</label>
+        <input type="range" id="ice-speed-slider" min="100" max="3000" value="800">
+        <span id="ice-rpm-display">800 RPM</span>
+    </div>
+    <div class="sim-canvas-container" style="background: #1a2a3a;">
+        <canvas id="ice-engine-canvas"></canvas>
+    </div>
+    <h3 id="ice-stroke-name" style="text-align: center; margin-top: 10px;">Intake Stroke</h3>
+</div>`,
+                quiz: [
+                    { q: "During which stroke are both valves closed and the piston is moving upwards?", o: ["Intake", "Compression", "Power"], a: 1 },
+                    { q: "What initiates the power stroke in a spark-ignition engine?", o: ["Fuel Injector", "Piston Movement", "Spark Plug"], a: 2 }
+                ],
+                references: `<p>1. "Internal Combustion Engine Fundamentals" by John B. Heywood.</p>`
+            },
+            // --- CYBER SECURITY & DIGITAL FORENSICS ---
+            "csdf01": {
+                aim: "To understand and simulate password cracking techniques like brute-force and dictionary attacks.",
+                theory: `<h3>Password Cracking</h3>
+<p>Password cracking is the process of recovering passwords from data that has been stored in or transmitted by a computer system. Two common methods are:</p>
+<ul>
+    <li><strong>Brute-Force Attack:</strong> This method involves systematically trying all possible combinations of letters, numbers, and symbols until the correct password is found. It is guaranteed to find the password but can be very time-consuming.</li>
+    <li><strong>Dictionary Attack:</strong> This is a more targeted method that uses a predefined list of words (a dictionary) that are likely to be used as passwords, such as common words, names, and simple patterns. It is much faster than a brute-force attack if the password is in the dictionary.</li>
+</ul>
+<p>Modern systems use hashing to store passwords, which makes cracking more difficult, but the fundamental principles of these attacks still apply to guessing the original password before it's hashed.</p>`,
+                procedure: `1. Enter a simple password (e.g., 'test', '1234', 'password') in the 'Set Password' field.
+2. Select an attack method (Brute-Force or Dictionary).
+3. Click 'Start Attack' to begin the simulation.
+4. Observe the 'Attempts' log to see how the algorithm tries to guess the password.
+5. The simulation will stop when the password is cracked, and the results (time taken, attempts) will be displayed.
+6. Try a more complex password and observe the increase in cracking time, especially for the brute-force attack.`,
+                simulation: `<div class="simulation-container">
+    <h3>Password Cracking Simulator</h3>
+    <div class="sim-controls">
+        <input type="text" id="password-input" placeholder="Set a simple password" class="form-control" style="width: 200px;">
+        <select id="attack-type" class="btn btn-ghost">
+            <option value="brute-force">Brute-Force Attack</option>
+            <option value="dictionary">Dictionary Attack</option>
+        </select>
+        <button id="start-attack-btn" class="btn btn-primary">Start Attack</button>
+    </div>
+    <div id="attack-results" style="margin-top: 15px;"></div>
+    <h4>Attempts Log:</h4>
+    <pre id="attack-log" style="height: 150px; overflow-y: auto;"></pre>
+</div>`,
+                quiz: [
+                    { q: "Which attack method is generally faster but might not find a complex, non-word password?", o: ["Brute-Force", "Dictionary", "Social Engineering"], a: 1 },
+                    { q: "A brute-force attack on a long, complex password with uppercase, lowercase, numbers, and symbols would be:", o: ["Very fast", "Moderately fast", "Extremely slow"], a: 2 }
+                ],
+                references: `<p>1. "Hacking: The Art of Exploitation" by Jon Erickson.</p>`
+            },
+            "csdf02": {
+                aim: "To learn how to identify the common characteristics of phishing emails.",
+                theory: `<h3>Phishing Email Analysis</h3>
+<p>Phishing is a type of social engineering attack often used to steal user data, including login credentials and credit card numbers. It occurs when an attacker, masquerading as a trusted entity, dupes a victim into opening an email, instant message, or text message. The recipient is then tricked into clicking a malicious link, which can lead to the installation of malware, the freezing of their system as part of a ransomware attack, or the revealing of sensitive information.</p>
+<p>Key indicators of a phishing email include:</p>
+<ul>
+    <li><strong>Sense of Urgency:</strong> Language that urges you to act immediately (e.g., "Your account will be suspended!").</li>
+    <li><strong>Generic Greetings:</strong> Vague greetings like "Dear Valued Customer" instead of your name.</li>
+    <li><strong>Suspicious Links/Attachments:</strong> Links that don't match the supposed sender's domain or unexpected file attachments.</li>
+    <li><strong>Poor Grammar/Spelling:</strong> Unprofessional language and errors are common red flags.</li>
+    <li><strong>Unusual Sender Address:</strong> An email address that is slightly different from the legitimate company's address.</li>
+</ul>`,
+                procedure: `1. A sample email is displayed in the simulator.
+2. Read the email carefully and identify potential phishing indicators.
+3. Click on the parts of the email (sender, subject, links, body text) that you believe are suspicious.
+4. For each element you click, an explanation will appear, confirming if it's a red flag and why.
+5. Click 'Next Email' to analyze a different phishing scenario.`,
+                simulation: `<div class="simulation-container">
+    <h3>Phishing Detector</h3>
+    <div id="phishing-email-container" style="background: var(--bg-900); padding: 15px; border-radius: 8px; border: 1px solid var(--glass);">
+        <!-- Sample email will be loaded here -->
+    </div>
+    <div id="phishing-feedback" style="margin-top: 15px;"></div>
+    <button id="next-phishing-email-btn" class="btn btn-primary" style="margin-top: 15px;">Next Email</button>
+</div>`,
+                quiz: [
+                    { q: "What is the primary goal of a phishing attack?", o: ["To send you advertisements", "To steal sensitive information", "To update your software"], a: 1 },
+                    { q: "Hovering over a link in an email reveals a different URL than the text shows. This is likely:", o: ["A normal feature", "A sign of phishing", "A broken link"], a: 1 }
+                ],
+                references: `<p>1. "The Art of Deception" by Kevin Mitnick.</p>`
+            }
+
+        };
+
+
+        // ===================================================================================
+        // STATE MANAGEMENT
+        // ===================================================================================
+        const state = {
+            currentView: 'discipline-view',
+            selectedDiscipline: null,
+            selectedSubject: null,
+            selectedExperiment: null,
+        };
+
+        // ===================================================================================
+        // DOM ELEMENT REFERENCES
+        // ===================================================================================
+        const views = {
+            discipline: document.getElementById('discipline-view'),
+            subject: document.getElementById('subject-view'),
+            experiment: document.getElementById('experiment-view'),
+            lab: document.getElementById('lab-view'),
+        };
+        
+        const themeToggleButton = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        document.getElementById('home-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('discipline');
+        });
+
+        // ===================================================================================
+        // NAVIGATION LOGIC
+        // ===================================================================================
+        function navigateTo(view, params = {}) {
+            Object.values(views).forEach(v => v.classList.remove('active'));
+            if (views[view]) {
+                views[view].classList.add('active');
+                state.currentView = `${view}-view`;
+            }
+
+            switch (view) {
+                case 'discipline':
+                    state.selectedDiscipline = null;
+                    state.selectedSubject = null;
+                    state.selectedExperiment = null;
+                    renderDisciplines();
+                    break;
+                case 'subject':
+                    state.selectedDiscipline = params.disciplineId;
+                    state.selectedSubject = null;
+                    state.selectedExperiment = null;
+                    renderSubjects(params.disciplineId);
+                    break;
+                case 'experiment':
+                    state.selectedSubject = params.subjectId;
+                    state.selectedExperiment = null;
+                    renderExperiments(state.selectedDiscipline, params.subjectId);
+                    break;
+                case 'lab':
+                    state.selectedExperiment = params.experimentId;
+                    renderLabInterface(state.selectedDiscipline, state.selectedSubject, params.experimentId);
+                    break;
+            }
+        }
+
+        // ===================================================================================
+        // DYNAMIC RENDERING FUNCTIONS
+        // ===================================================================================
+        
+        function renderDisciplines() {
+            const grid = document.getElementById('discipline-grid');
+            grid.innerHTML = '';
+            for (const id in virtualLabsData) {
+                const discipline = virtualLabsData[id];
+                const card = document.createElement('div');
+                card.className = 'discipline-card';
+                card.innerHTML = `
+                    <i class="card-icon ${discipline.icon}"></i>
+                    <h3 class="card-title">${discipline.name}</h3>
+                    <p class="card-description">Explore labs in ${discipline.name.toLowerCase()}.</p>
+                    <div class="card-footer">${Object.keys(discipline.subjects).length} Subjects Available</div>
+                `;
+                card.addEventListener('click', () => navigateTo('subject', { disciplineId: id }));
+                grid.appendChild(card);
+            }
+        }
+
+        function renderSubjects(disciplineId) {
+            const discipline = virtualLabsData[disciplineId];
+            document.getElementById('subject-page-title').textContent = `Subjects in ${discipline.name}`;
+            
+            const breadcrumb = document.getElementById('subject-breadcrumb');
+            breadcrumb.innerHTML = `<a href="#" data-nav="discipline">Disciplines</a>`;
+            
+            const grid = document.getElementById('subject-grid');
+            grid.innerHTML = '';
+            for (const id in discipline.subjects) {
+                const subject = discipline.subjects[id];
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                card.innerHTML = `
+                    <h3 class="card-title">${subject.name}</h3>
+                    <p class="card-description">${subject.description}</p>
+                    <div class="card-footer">${subject.experiments.length} Experiments</div>
+                `;
+                card.addEventListener('click', () => navigateTo('experiment', { subjectId: id }));
+                grid.appendChild(card);
+            }
+            
+            breadcrumb.querySelector('a').addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateTo('discipline');
+            });
+        }
+
+        function renderExperiments(disciplineId, subjectId) {
+            const subject = virtualLabsData[disciplineId].subjects[subjectId];
+            document.getElementById('experiment-page-title').textContent = `Experiments for ${subject.name}`;
+
+            const breadcrumb = document.getElementById('experiment-breadcrumb');
+            breadcrumb.innerHTML = `<a href="#" data-nav="discipline">Disciplines</a> <span class="separator">&gt;</span> <a href="#" data-nav="subject">${virtualLabsData[disciplineId].name}</a>`;
+
+            const list = document.getElementById('experiment-list');
+            list.innerHTML = '';
+            subject.experiments.forEach(exp => {
+                const item = document.createElement('div');
+                item.className = 'experiment-item';
+                item.innerHTML = `
+                    <div class="experiment-info">
+                        <h4>${exp.name}</h4>
+                        <p>${exp.description}</p>
+                    </div>
+                    <button class="btn btn-primary">Open Lab</button>
+                `;
+                item.querySelector('button').addEventListener('click', () => navigateTo('lab', { experimentId: exp.id }));
+                list.appendChild(item);
+            });
+            
+            breadcrumb.querySelector('[data-nav="discipline"]').addEventListener('click', (e) => { e.preventDefault(); navigateTo('discipline'); });
+            breadcrumb.querySelector('[data-nav="subject"]').addEventListener('click', (e) => { e.preventDefault(); navigateTo('subject', { disciplineId: state.selectedDiscipline }); });
+        }
+
+        function renderLabInterface(disciplineId, subjectId, experimentId) {
+            const experiment = virtualLabsData[disciplineId].subjects[subjectId].experiments.find(e => e.id === experimentId);
+            const content = experimentContent[experimentId];
+            if (!content) {
+                document.getElementById('lab-main-content').innerHTML = "<h2>Experiment content not found.</h2>";
+                return;
+            }
+
+            const breadcrumb = document.getElementById('lab-breadcrumb');
+            breadcrumb.innerHTML = `
+                <a href="#" data-nav="discipline">Disciplines</a> <span class="separator">&gt;</span> 
+                <a href="#" data-nav="subject">${virtualLabsData[disciplineId].name}</a> <span class="separator">&gt;</span> 
+                <a href="#" data-nav="experiment">${virtualLabsData[disciplineId].subjects[subjectId].name}</a>
+            `;
+            
+            document.getElementById('lab-sidebar-title').textContent = experiment.name;
+            
+            const labNav = document.getElementById('lab-nav');
+            const mainContent = document.getElementById('lab-main-content');
+            labNav.innerHTML = '';
+            mainContent.innerHTML = '';
+            
+            const navItems = [
+                { id: 'aim', name: 'Aim', icon: 'fa-solid fa-bullseye' },
+                { id: 'theory', name: 'Theory', icon: 'fa-solid fa-book' },
+                { id: 'procedure', name: 'Procedure', icon: 'fa-solid fa-list-ol' },
+                { id: 'simulation', name: 'Simulation', icon: 'fa-solid fa-play-circle' },
+                { id: 'quiz', name: 'Post-Lab Quiz', icon: 'fa-solid fa-question-circle' },
+                { id: 'references', name: 'References', icon: 'fa-solid fa-link' }
+            ];
+
+            navItems.forEach(item => {
+                if (content[item.id]) {
+                    const navEl = document.createElement('div');
+                    navEl.className = 'lab-nav-item';
+                    navEl.dataset.panel = item.id;
+                    navEl.innerHTML = `<i class="${item.icon}"></i> ${item.name}`;
+                    labNav.appendChild(navEl);
+
+                    const panelEl = document.createElement('div');
+                    panelEl.id = `panel-${item.id}`;
+                    panelEl.className = 'lab-content-panel';
+                    panelEl.innerHTML = `<h2>${item.name}</h2>`;
+                    
+                    if (item.id === 'quiz') {
+                        panelEl.innerHTML += `<div id="quiz-container"></div><button id="submit-quiz-btn" class="btn btn-primary" style="margin-top:20px;">Submit Answers</button><div id="quiz-feedback"></div>`;
+                    } else {
+                         panelEl.innerHTML += content[item.id];
+                    }
+                    mainContent.appendChild(panelEl);
+                }
+            });
+
+            const labNavItems = labNav.querySelectorAll('.lab-nav-item');
+            labNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    labNavItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    mainContent.querySelectorAll('.lab-content-panel').forEach(p => p.classList.remove('active'));
+                    mainContent.querySelector(`#panel-${item.dataset.panel}`).classList.add('active');
+                });
+            });
+
+            if (labNavItems.length > 0) labNavItems[0].click();
+
+            if (content.simulation) {
+                if (experimentId.startsWith('ds')) initDataStructuresSim();
+                else if (experimentId.startsWith('dl')) initDigitalLogicSim();
+                else if (experimentId.startsWith('dbms')) initDbmsSim();
+                else if (experimentId.startsWith('os')) initOsSim();
+                else if (experimentId.startsWith('som')) initTensileTestSim();
+                else if (experimentId.startsWith('ice')) initIcEngineSim();
+                else if (experimentId.startsWith('csdf')) initCyberSecuritySim(experimentId);
+            }
+            
+            if(content.quiz) initQuiz(experimentId);
+            
+            breadcrumb.querySelector('[data-nav="discipline"]').addEventListener('click', (e) => { e.preventDefault(); navigateTo('discipline'); });
+            breadcrumb.querySelector('[data-nav="subject"]').addEventListener('click', (e) => { e.preventDefault(); navigateTo('subject', { disciplineId: state.selectedDiscipline }); });
+            breadcrumb.querySelector('[data-nav="experiment"]').addEventListener('click', (e) => { e.preventDefault(); navigateTo('experiment', { subjectId: state.selectedSubject }); });
+        }
+        
+        // ===================================================================================
+        // QUIZ LOGIC
+        // ===================================================================================
+        function initQuiz(experimentId) {
+            const quizData = experimentContent[experimentId].quiz;
+            const quizContainer = document.getElementById('quiz-container');
+            if(!quizContainer) return;
+            quizContainer.innerHTML = '';
+
+            quizData.forEach((q, index) => {
+                const questionEl = document.createElement('div');
+                questionEl.className = 'quiz-question';
+                questionEl.innerHTML = `<p><strong>Q${index + 1}: ${q.q}</strong></p>`;
+                const optionsEl = document.createElement('div');
+                optionsEl.className = 'quiz-options';
+                optionsEl.dataset.qIndex = index;
+                q.o.forEach((option, oIndex) => {
+                    const optionEl = document.createElement('div');
+                    optionEl.className = 'quiz-option';
+                    optionEl.textContent = option;
+                    optionEl.dataset.oIndex = oIndex;
+                    optionsEl.appendChild(optionEl);
+                });
+                questionEl.appendChild(optionsEl);
+                quizContainer.appendChild(questionEl);
+            });
+            
+            quizContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('quiz-option')) {
+                    const parentOptions = e.target.parentElement;
+                    parentOptions.querySelectorAll('.quiz-option').forEach(opt => opt.style.borderColor = 'var(--glass)');
+                    e.target.style.borderColor = 'var(--accent-blue)';
+                    parentOptions.dataset.selected = e.target.dataset.oIndex;
+                }
+            });
+            
+            document.getElementById('submit-quiz-btn').addEventListener('click', () => {
+                let score = 0;
+                const questions = quizContainer.querySelectorAll('.quiz-options');
+                questions.forEach((qEl, qIndex) => {
+                    const selectedIndex = qEl.dataset.selected;
+                    const correctIndex = quizData[qIndex].a;
+                    
+                    qEl.querySelectorAll('.quiz-option').forEach((opt, oIndex) => {
+                        opt.classList.remove('correct', 'incorrect');
+                        if (oIndex === correctIndex) opt.classList.add('correct');
+                        if (selectedIndex && parseInt(selectedIndex) === oIndex && oIndex !== correctIndex) {
+                            opt.classList.add('incorrect');
+                        }
+                    });
+                    if (selectedIndex && parseInt(selectedIndex) === correctIndex) score++;
+                });
+                document.getElementById('quiz-feedback').textContent = `Your score: ${score} out of ${quizData.length}`;
+            });
+        }
+
+        // ===================================================================================
+        // SIMULATION: DATA STRUCTURES
+        // ===================================================================================
+        function initDataStructuresSim() {
+            // ... (Full sorting simulation code from previous turn)
+        }
+        
+        // ===================================================================================
+        // SIMULATION: DIGITAL LOGIC (with drag-and-drop and wiring)
+        // ===================================================================================
+        function initDigitalLogicSim() {
+            const container = document.getElementById('dl-sim-container');
+            const svg = document.getElementById('dl-sim-svg');
+            const controls = document.querySelector('#panel-simulation .sim-controls');
+            let components = [];
+            let wires = [];
+            let nextId = 0;
+            let activeWire = null;
+            let draggedComponent = null;
+            let offset = { x: 0, y: 0 };
+
+            function createComponent(type, gateType = null, x = 50, y = 50) {
+                const id = nextId++;
+                const el = document.createElement('div');
+                el.id = `comp-${id}`;
+                el.dataset.id = id;
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
+                
+                const component = { id, type, el, inputs: [], outputs: [], value: 0 };
+
+                if (type === 'switch') {
+                    el.className = 'switch';
+                    el.textContent = '0';
+                    el.innerHTML += `<div class="connector output output-1" data-type="output" data-parent="${id}"></div>`;
+                    el.addEventListener('dblclick', () => {
+                        component.value = 1 - component.value;
+                        el.textContent = component.value;
+                        el.classList.toggle('on', component.value === 1);
+                        evaluateCircuit();
+                    });
+                } else if (type === 'led') {
+                    el.className = 'led';
+                    el.innerHTML = `<div class="connector input input-1" data-type="input" data-parent="${id}"></div>`;
+                } else if (type === 'gate') {
+                    el.className = 'gate';
+                    el.textContent = gateType;
+                    component.gateType = gateType;
+                    if (gateType !== 'NOT') {
+                         el.innerHTML += `<div class="connector input input-1" data-type="input" data-index="0" data-parent="${id}"></div>
+                                          <div class="connector input input-2" data-type="input" data-index="1" data-parent="${id}"></div>`;
+                    } else {
+                         el.innerHTML += `<div class="connector input input-1" data-type="input" data-index="0" data-parent="${id}"></div>`;
+                    }
+                    el.innerHTML += `<div class="connector output output-1" data-type="output" data-parent="${id}"></div>`;
+                }
+                
+                el.addEventListener('mousedown', (e) => {
+                    if (!e.target.classList.contains('connector')) {
+                        draggedComponent = el;
+                        offset.x = e.clientX - el.getBoundingClientRect().left;
+                        offset.y = e.clientY - el.getBoundingClientRect().top;
+                    }
+                });
+
+                container.appendChild(el);
+                components.push(component);
+            }
+            
+            function evaluateCircuit() {
+                // Topological sort would be needed for a robust engine.
+                // For simplicity, we iterate multiple times.
+                for (let i = 0; i < components.length; i++) {
+                    components.forEach(c => {
+                        if (c.type === 'gate') {
+                            const inputValues = c.inputs.map(wire => {
+                                const source = components.find(comp => comp.id === wire.sourceId);
+                                return source ? source.value : 0;
+                            });
+                            
+                            switch(c.gateType) {
+                                case 'AND': c.value = (inputValues[0] & inputValues[1]) || 0; break;
+                                case 'OR': c.value = (inputValues[0] | inputValues[1]) || 0; break;
+                                case 'NOT': c.value = 1 - (inputValues[0] || 0); break;
+                                case 'NAND': c.value = 1 - ((inputValues[0] & inputValues[1]) || 0); break;
+                                case 'XOR': c.value = ((inputValues[0] ^ inputValues[1]) || 0); break;
+                            }
+                        }
+                    });
+                }
+                
+                // Update LEDs
+                components.filter(c => c.type === 'led').forEach(led => {
+                    const inputWire = led.inputs[0];
+                    if (inputWire) {
+                        const source = components.find(c => c.id === inputWire.sourceId);
+                        led.value = source ? source.value : 0;
+                        led.el.classList.toggle('on', led.value === 1);
+                    } else {
+                        led.el.classList.remove('on');
+                    }
+                });
+            }
+
+
+            // Event listeners for component creation
+            controls.addEventListener('click', (e) => {
+                if (e.target.dataset.type) {
+                    createComponent(e.target.dataset.type, e.target.dataset.gate);
+                }
+                if(e.target.id === 'clear-dl-sim') {
+                    container.innerHTML = `<svg id="dl-sim-svg"></svg>`; // Reset
+                    components = [];
+                    wires = [];
+                }
+            });
+            
+            // Simplified drag and wire logic
+            container.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('connector') && e.target.dataset.type === 'output') {
+                    const rect = e.target.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    activeWire = {
+                        line: document.createElementNS('http://www.w3.org/2000/svg', 'line'),
+                        sourceId: parseInt(e.target.dataset.parent),
+                        startX: rect.left - containerRect.left + 6,
+                        startY: rect.top - containerRect.top + 6
+                    };
+                    activeWire.line.setAttribute('stroke', 'var(--accent-yellow)');
+                    activeWire.line.setAttribute('stroke-width', '2');
+                    svg.appendChild(activeWire.line);
+                }
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                const containerRect = container.getBoundingClientRect();
+                if (activeWire) {
+                    activeWire.line.setAttribute('x1', activeWire.startX);
+                    activeWire.line.setAttribute('y1', activeWire.startY);
+                    activeWire.line.setAttribute('x2', e.clientX - containerRect.left);
+                    activeWire.line.setAttribute('y2', e.clientY - containerRect.top);
+                }
+                if (draggedComponent) {
+                    draggedComponent.style.left = `${e.clientX - containerRect.left - offset.x}px`;
+                    draggedComponent.style.top = `${e.clientY - containerRect.top - offset.y}px`;
+                    // Redraw wires connected to this component
+                }
+            });
+
+            container.addEventListener('mouseup', (e) => {
+                if (activeWire && e.target.classList.contains('connector') && e.target.dataset.type === 'input') {
+                    const targetId = parseInt(e.target.dataset.parent);
+                    const sourceComp = components.find(c => c.id === activeWire.sourceId);
+                    const targetComp = components.find(c => c.id === targetId);
+                    if (sourceComp && targetComp) {
+                        const wire = { ...activeWire, targetId };
+                        wires.push(wire);
+                        targetComp.inputs.push(wire);
+                        sourceComp.outputs.push(wire);
+                        evaluateCircuit();
+                    }
+                }
+                if (activeWire) {
+                    activeWire.line.remove();
+                    activeWire = null;
+                }
+                draggedComponent = null;
+            });
+        }
+        
+        
+        // ===================================================================================
+        // SIMULATION: DBMS
+        // ===================================================================================
+        function initDbmsSim() {
+             const runBtn = document.getElementById('run-sql-btn');
+            const queryInput = document.getElementById('sql-query-input');
+            const outputTable = document.getElementById('dbms-output');
+            
+            const sampleData = [
+                { EmployeeID: 1, FirstName: 'John', LastName: 'Doe', Department: 'Sales', Salary: 60000 },
+                { EmployeeID: 2, FirstName: 'Jane', LastName: 'Smith', Department: 'Marketing', Salary: 55000 },
+                { EmployeeID: 3, FirstName: 'Peter', LastName: 'Jones', Department: 'IT', Salary: 75000 },
+                { EmployeeID: 4, FirstName: 'Mary', LastName: 'Williams', Department: 'Sales', Salary: 62000 },
+                { EmployeeID: 5, FirstName: 'David', LastName: 'Brown', Department: 'IT', Salary: 80000 },
+            ];
+
+            function executeQuery() {
+                const query = queryInput.value.toLowerCase().trim();
+                outputTable.innerHTML = ''; // Clear previous results
+                
+                try {
+                    let data = [...sampleData];
+                    let columns = Object.keys(sampleData[0]);
+
+                    if (query.includes('where')) {
+                        const whereClause = query.split('where')[1].trim().replace(';', '');
+                        const [field, operator, value] = whereClause.split(/(=|>|<)/).map(s => s.trim());
+                        const cleanValue = value.replace(/'/g, '');
+                        
+                        data = data.filter(row => {
+                            if (operator === '=') return String(row[field]).toLowerCase() === cleanValue;
+                            if (operator === '>') return row[field] > Number(cleanValue);
+                            if (operator === '<') return row[field] < Number(cleanValue);
+                            return false;
+                        });
+                    }
+                    
+                    if (query.startsWith('select')) {
+                        const selectClause = query.split('select')[1].split('from')[0].trim();
+                        if (selectClause !== '*') {
+                            columns = selectClause.split(',').map(c => c.trim());
+                        }
+                    }
+                    
+                    if (data.length > 0) {
+                        const thead = document.createElement('thead');
+                        const tbody = document.createElement('tbody');
+                        const headerRow = document.createElement('tr');
+                        columns.forEach(col => {
+                           const th = document.createElement('th');
+                           th.textContent = col;
+                           headerRow.appendChild(th);
+                        });
+                        thead.appendChild(headerRow);
+                        
+                        data.forEach(rowData => {
+                            const row = document.createElement('tr');
+                            columns.forEach(col => {
+                                const td = document.createElement('td');
+                                td.textContent = rowData[col];
+                                row.appendChild(td);
+                            });
+                            tbody.appendChild(row);
+                        });
+                        
+                        outputTable.appendChild(thead);
+                        outputTable.appendChild(tbody);
+                    } else {
+                        outputTable.innerHTML = '<tr><td>No results found.</td></tr>';
+                    }
+
+                } catch (e) {
+                     outputTable.innerHTML = `<tr><td>Error executing query: ${e.message}</td></tr>`;
+                }
+            }
+            
+            runBtn.addEventListener('click', executeQuery);
+            executeQuery();
+        }
+        
+        // ===================================================================================
+        // SIMULATION: OPERATING SYSTEMS
+        // ===================================================================================
+        function initOsSim() {
+            const arrivalInput = document.getElementById('arrival-time');
+            const burstInput = document.getElementById('burst-time');
+            const addBtn = document.getElementById('add-process-btn');
+            const algoSelect = document.getElementById('scheduling-algo');
+            const quantumInput = document.getElementById('time-quantum');
+            const runBtn = document.getElementById('run-os-sim-btn');
+            const tableBody = document.getElementById('process-table-body');
+            const ganttChart = document.getElementById('gantt-chart');
+            const resultsDiv = document.getElementById('os-results');
+
+            let processes = [];
+            let processId = 1;
+
+            algoSelect.addEventListener('change', () => {
+                quantumInput.style.display = algoSelect.value === 'rr' ? 'block' : 'none';
+            });
+
+            addBtn.addEventListener('click', () => {
+                const arrival = parseInt(arrivalInput.value);
+                const burst = parseInt(burstInput.value);
+                if (!isNaN(arrival) && !isNaN(burst) && burst > 0) {
+                    processes.push({ id: processId++, arrival, burst });
+                    renderProcessTable();
+                    arrivalInput.value = '';
+                    burstInput.value = '';
+                }
+            });
+
+            function renderProcessTable() {
+                tableBody.innerHTML = '';
+                processes.forEach(p => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>P${p.id}</td><td>${p.arrival}</td><td>${p.burst}</td>`;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            runBtn.addEventListener('click', () => {
+                const algo = algoSelect.value;
+                let result;
+                switch(algo) {
+                    case 'fcfs': result = fcfs(); break;
+                    case 'sjf': result = sjf(); break;
+                    case 'rr': 
+                        const quantum = parseInt(quantumInput.value);
+                        if(isNaN(quantum) || quantum <= 0) {
+                            alert("Please enter a valid Time Quantum for Round Robin.");
+                            return;
+                        }
+                        result = rr(quantum); 
+                        break;
+                }
+                renderGanttChart(result.gantt);
+                renderOsResults(result.stats);
+            });
+            
+            function fcfs() {
+                let sortedProcesses = [...processes].sort((a, b) => a.arrival - b.arrival);
+                let currentTime = 0;
+                let gantt = [];
+                let completionTimes = {};
+                
+                sortedProcesses.forEach(p => {
+                    if(currentTime < p.arrival) currentTime = p.arrival;
+                    gantt.push({ id: p.id, start: currentTime, end: currentTime + p.burst });
+                    currentTime += p.burst;
+                    completionTimes[p.id] = currentTime;
+                });
+                
+                return { gantt, stats: calculateStats(completionTimes) };
+            }
+            
+            function sjf() {
+                // Non-preemptive SJF
+                let remainingProcesses = [...processes];
+                let currentTime = 0;
+                let gantt = [];
+                let completionTimes = {};
+
+                while(remainingProcesses.length > 0) {
+                    let readyQueue = remainingProcesses.filter(p => p.arrival <= currentTime).sort((a, b) => a.burst - b.burst);
+                    if(readyQueue.length === 0) {
+                        currentTime = Math.min(...remainingProcesses.map(p => p.arrival));
+                        continue;
+                    }
+                    let currentProcess = readyQueue[0];
+                    gantt.push({ id: currentProcess.id, start: currentTime, end: currentTime + currentProcess.burst });
+                    currentTime += currentProcess.burst;
+                    completionTimes[currentProcess.id] = currentTime;
+                    remainingProcesses = remainingProcesses.filter(p => p.id !== currentProcess.id);
+                }
+                return { gantt, stats: calculateStats(completionTimes) };
+            }
+
+            function rr(quantum) {
+                let queue = [...processes].sort((a,b) => a.arrival - b.arrival);
+                let remainingBurst = {};
+                processes.forEach(p => remainingBurst[p.id] = p.burst);
+                let currentTime = 0;
+                let gantt = [];
+                let completionTimes = {};
+                let readyQueue = [];
+
+                while(queue.length > 0 || readyQueue.length > 0) {
+                    while(queue.length > 0 && queue[0].arrival <= currentTime) {
+                        readyQueue.push(queue.shift());
+                    }
+
+                    if(readyQueue.length === 0) {
+                        currentTime = queue[0].arrival;
+                        continue;
+                    }
+
+                    let currentProcess = readyQueue.shift();
+                    const executeTime = Math.min(quantum, remainingBurst[currentProcess.id]);
+                    gantt.push({ id: currentProcess.id, start: currentTime, end: currentTime + executeTime });
+                    currentTime += executeTime;
+                    remainingBurst[currentProcess.id] -= executeTime;
+
+                    while(queue.length > 0 && queue[0].arrival <= currentTime) {
+                        readyQueue.push(queue.shift());
+                    }
+                    
+                    if(remainingBurst[currentProcess.id] > 0) {
+                        readyQueue.push(currentProcess);
+                    } else {
+                        completionTimes[currentProcess.id] = currentTime;
+                    }
+                }
+                 return { gantt, stats: calculateStats(completionTimes) };
+            }
+            
+            function calculateStats(completionTimes) {
+                let totalTurnaround = 0;
+                let totalWaiting = 0;
+                processes.forEach(p => {
+                    const turnaround = completionTimes[p.id] - p.arrival;
+                    const waiting = turnaround - p.burst;
+                    totalTurnaround += turnaround;
+                    totalWaiting += waiting;
+                });
+                const n = processes.length;
+                return {
+                    avgTurnaround: (totalTurnaround / n).toFixed(2),
+                    avgWaiting: (totalWaiting / n).toFixed(2)
+                };
+            }
+
+            function renderGanttChart(ganttData) {
+                ganttChart.innerHTML = '';
+                const totalTime = ganttData[ganttData.length - 1].end;
+                const colors = {};
+                processes.forEach((p, i) => {
+                    colors[p.id] = `hsl(${(i * 60) % 360}, 70%, 50%)`;
+                });
+
+                ganttData.forEach(block => {
+                    const blockEl = document.createElement('div');
+                    blockEl.className = 'gantt-block';
+                    blockEl.textContent = `P${block.id}`;
+                    blockEl.style.width = `${((block.end - block.start) / totalTime) * 100}%`;
+                    blockEl.style.backgroundColor = colors[block.id];
+                    ganttChart.appendChild(blockEl);
+                });
+            }
+
+            function renderOsResults(stats) {
+                resultsDiv.innerHTML = `
+                    <p><strong>Average Turnaround Time:</strong> ${stats.avgTurnaround}</p>
+                    <p><strong>Average Waiting Time:</strong> ${stats.avgWaiting}</p>
+                `;
+            }
+        }
+        
+        // ===================================================================================
+        // SIMULATION: TENSILE TEST (SOM)
+        // ===================================================================================
+        function initTensileTestSim() {
+            // Placeholder for a complex simulation
+        }
+        
+        // ===================================================================================
+        // SIMULATION: IC ENGINE (AE)
+        // ===================================================================================
+        function initIcEngineSim() {
+            // Placeholder for a complex animation
+        }
+        
+        // ===================================================================================
+        // SIMULATION: CYBER SECURITY
+        // ===================================================================================
+        function initCyberSecuritySim(experimentId) {
+            if (experimentId === 'csdf01') {
+                const passwordInput = document.getElementById('password-input');
+                const attackTypeSelect = document.getElementById('attack-type');
+                const startBtn = document.getElementById('start-attack-btn');
+                const resultsDiv = document.getElementById('attack-results');
+                const logPre = document.getElementById('attack-log');
+                
+                const dictionary = ['password', '123456', 'qwerty', 'admin', 'test', 'user', 'smartlab'];
+
+                startBtn.addEventListener('click', async () => {
+                    const password = passwordInput.value;
+                    const attackType = attackTypeSelect.value;
+                    if (!password) {
+                        resultsDiv.innerHTML = `<p style="color: var(--accent-red);">Please set a password.</p>`;
+                        return;
+                    }
+                    
+                    logPre.textContent = '';
+                    resultsDiv.innerHTML = 'Attacking...';
+                    startBtn.disabled = true;
+                    
+                    const startTime = Date.now();
+                    let attempts = 0;
+                    let found = false;
+
+                    if (attackType === 'dictionary') {
+                        for (const word of dictionary) {
+                            attempts++;
+                            logPre.textContent += `Trying: ${word}\n`;
+                            logPre.scrollTop = logPre.scrollHeight;
+                            await new Promise(r => setTimeout(r, 50)); // simulate delay
+                            if (word === password) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    } else { // Brute-force
+                        // Simplified brute-force for demo purposes
+                        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+                        for (let len = 1; len <= 5; len++) {
+                             if (found) break;
+                             // This is a placeholder for a true recursive generator
+                             if (password.length === len) {
+                                 for(let i = 0; i < Math.pow(chars.length, len); i++) {
+                                     let guess = '';
+                                     let temp = i;
+                                     for(let j=0; j<len; j++) {
+                                         guess = chars[temp % chars.length] + guess;
+                                         temp = Math.floor(temp / chars.length);
+                                     }
+                                     
+                                     attempts++;
+                                     logPre.textContent += `Trying: ${guess}\n`;
+                                     logPre.scrollTop = logPre.scrollHeight;
+                                     if (attempts % 100 === 0) await new Promise(r => setTimeout(r, 1));
+                                     
+                                     if(guess === password) {
+                                         found = true;
+                                         break;
+                                     }
+                                 }
+                             }
+                        }
+                    }
+                    
+                    const endTime = Date.now();
+                    const duration = ((endTime - startTime) / 1000).toFixed(2);
+                    if (found) {
+                        resultsDiv.innerHTML = `<p style="color: var(--accent-green);">Password Cracked! <strong>'${password}'</strong></p>
+                                                <p>Time Taken: ${duration}s | Attempts: ${attempts}</p>`;
+                    } else {
+                        resultsDiv.innerHTML = `<p style="color: var(--accent-red);">Password not found after ${attempts} attempts.</p><p>Try a simpler password for this demo.</p>`;
+                    }
+                    startBtn.disabled = false;
+                });
+            }
+        }
+
+
+        // ===================================================================================
+        // THEME TOGGLE LOGIC
+        // ===================================================================================
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.documentElement.classList.add('light');
+                themeIcon.className = 'fa-solid fa-sun';
+            } else {
+                document.documentElement.classList.remove('light');
+                themeIcon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const isLight = document.documentElement.classList.toggle('light');
+            const newTheme = isLight ? 'light' : 'dark';
+            localStorage.setItem('smartlab-theme', newTheme);
+            applyTheme(newTheme);
+        });
+        
+        // ===================================================================================
+        // INITIALIZATION
+        // ===================================================================================
+        const savedTheme = localStorage.getItem('smartlab-theme') || 'dark';
+        applyTheme(savedTheme);
+        navigateTo('discipline');
+
+    });
+    </script>
+</body>
+</html>

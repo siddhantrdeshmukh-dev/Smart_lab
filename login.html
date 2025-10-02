@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Lab System</title>
+    
+    <!-- Google Fonts & Material Icons via CDN for easy setup -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- Embedded CSS for Styling -->
+    <style>
+        /* ---------------------------------- */
+        /* 1. DESIGN SYSTEM & THEME         */
+        /* ---------------------------------- */
+        :root {
+            /* Role-based Accent Colors */
+            --accent-student: #007BFF; /* Blue */
+            --accent-faculty: #28a745; /* Green */
+            --accent-admin: #fd7e14;   /* Orange */
+            --accent-principal:#28a745;
+            /* The --accent-current variable will be dynamically set by JS */
+            --accent-current: var(--accent-student); /* Default to student */
+
+            /* Other Colors */
+            --surface-color: #FFFFFF;
+            --background-color: #f4f7fc;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            
+            /* Typography & Sizing */
+            --font-family-base: 'Poppins', sans-serif;
+            --border-radius-lg: 12px;
+            --box-shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --transition-smooth: 0.3s ease-in-out;
+        }
+
+        /* ---------------------------------- */
+        /* 2. GLOBAL & LAYOUT STYLES        */
+        /* ---------------------------------- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 1000px;
+            min-height: 600px;
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-lg);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+        }
+
+        /* ---------------------------------- */
+        /* 3. ILLUSTRATION (LEFT SIDE)      */
+        /* ---------------------------------- */
+        .login-illustration 
+             {
+             background-image: url("https://eco-cdn.iqpc.com/eco/images/channel_content/images/somark-interview_1.jpg");
+             background-size: cover;
+             background-repeat: no-repeat;
+             background-position: center;
+             background-position: center;
+             display: flex;
+             flex-direction: column;
+             justify-content: flex-end;
+             padding: 3rem;
+                color: rgb(9, 94, 50);
+        }
+
+        .illustration-text h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: rgb(221, 16, 60);        }
+
+        .illustration-text p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            color: rgb(220, 15, 63);
+        }
+        
+        /* ---------------------------------- */
+        /* 4. LOGIN FORM (RIGHT SIDE)      */
+        /* ---------------------------------- */
+        .login-form-wrapper {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition-smooth);
+            position: relative;
+        }
+
+        .home-link {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .home-link:hover {
+            color: var(--accent-current);
+        }
+        
+        .form-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .form-header p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* --- Role Selector --- */
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            align-self: center;
+        }
+        .role-selector input[type="radio"] {
+            display: none;
+        }
+        .role-selector label {
+            text-align: center;
+            padding: 0.8rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all var(--transition-smooth);
+        }
+        .role-selector input[type="radio"]:checked + label {
+            background-color: var(--accent-current);
+            color: rgb(68, 10, 167);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* --- Input Fields --- */
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group .material-icons-outlined {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            transition: color var(--transition-smooth);
+        }
+        .input-group .form-control {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3.5rem; /* Space for icon */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            font-size: 1rem;
+            transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+        }
+        .input-group .form-control:focus {
+            outline: none;
+            border-color: var(--accent-current);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-current) 25%, transparent);
+        }
+        .input-group .form-control:focus + .material-icons-outlined {
+            color: var(--accent-current);
+        }
+        
+        #password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 2rem;
+        }
+        .forgot-password {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        .forgot-password:hover { color: var(--accent-current); }
+        
+        /* --- Buttons --- */
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--border-radius-lg);
+            background-color: var(--accent-current);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-smooth);
+        }
+        .btn-login:hover {
+            filter: brightness(110%);
+            box-shadow: 0 5px 15px color-mix(in srgb, var(--accent-current) 40%, transparent);
+        }
+        
+        .signup-link {
+            text-align: center;
+            margin-top: auto; /* Push to bottom */
+            color: var(--text-secondary);
+        }
+        .signup-link a {
+            font-weight: 600;
+            color: var(--accent-current);
+            text-decoration: none;
+        }
+        
+        /* ---------------------------------- */
+        /* 5. RESPONSIVENESS                  */
+        /* ---------------------------------- */
+        @media (max-width: 992px) {
+            body {
+                padding: 0;
+            }
+            .login-container {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+                min-height: 100vh;
+                border-radius: 0;
+            }
+            .login-illustration {
+                display: none; /* Hide illustration on smaller screens */
+            }
+            .login-form-wrapper {
+                padding: 2rem;
+                justify-content: center;
+            }
+            .home-link {
+                position: static;
+                margin-bottom: 2rem;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body class="role-student"> <!-- Default role class -->
+
+    <div class="login-container">
+        <!-- ======================= -->
+        <!--  ILLUSTRATION SECTION   -->
+        <!-- ======================= -->
+        <div class="login-illustration">
+            <div class="illustration-text">
+                <h2>Unlock the Potential of Your Laboratory</h2>
+                <p>Secure, role-based access to a world of streamlined management and data-driven insights.</p>
+            </div>
+        </div>
+
+        <!-- ======================= -->
+        <!--      FORM SECTION       -->
+        <!-- ======================= -->
+        <div class="login-form-wrapper" id="login-form-wrapper">
+            <a href="index.html" class="home-link"><span class="material-icons-outlined">arrow_back</span> Back to Home</a>
+            
+            <div class="form-header">
+                <h2>Welcome Back!</h2>
+                <p>Please select your role and sign in.</p>
+            </div>
+
+            <form id="login-form" novalidate>
+                <!-- Role Selector -->
+                <div class="role-selector">
+                    <input type="radio" id="role-student" name="role" value="student" checked>
+                    <label for="role-student">Student</label>
+                    
+                    <input type="radio" id="role-faculty" name="role" value="faculty">
+                    <label for="role-faculty">Faculty</label>
+                    
+                    <input type="radio" id="role-admin" name="role" value="admin">
+                    <label for="role-admin">Admin</label>
+                    <input type="radio" id="role-principal" name="role" value="principal">
+                    <label for="role-principal">principal</label>
+
+
+                </div>
+
+                <!-- Email Input -->
+                <div class="input-group">
+                    <input type="email" id="email" class="form-control" required placeholder="Enter your email">
+                    <span class="material-icons-outlined">person_outline</span>
+                </div>
+
+                <!-- Password Input -->
+                <div class="input-group">
+                    <input type="password" id="password" class="form-control" required placeholder="Enter your password">
+                    <span class="material-icons-outlined">lock_outline</span>
+                    <span class="material-icons-outlined" id="password-toggle">visibility</span>
+                </div>
+                
+                <div class="form-options">
+                    <a href="forgetpassword.html" class="forgot-password">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn-login">Sign In</button>
+            </form>
+            
+            <p class="signup-link">Don't have an account? <a href="sighnup.html">Sign Up</a></p>
+        </div>
+    </div>
+    
+    <!-- Embedded JavaScript for Interactivity -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. ROLE SELECTOR THEME CHANGER ---
+            const roleSelectors = document.querySelectorAll('input[name="role"]');
+            const formWrapper = document.getElementById('login-form-wrapper');
+            const bodyElement = document.body;
+
+            const accentColors = {
+                student: 'var(--accent-student)',
+                faculty: 'var(--accent-faculty)',
+                admin: 'var(--accent-admin)',
+                principal: 'var(--accent-principal)',
+            };
+
+            roleSelectors.forEach(selector => {
+                selector.addEventListener('change', (event) => {
+                    const selectedRole = event.target.value;
+                    formWrapper.style.setProperty('--accent-current', accentColors[selectedRole]);
+                    bodyElement.className = '';
+                    bodyElement.classList.add(`role-${selectedRole}`);
+                });
+            });
+
+            formWrapper.style.setProperty('--accent-current', accentColors['student']);
+
+            // --- 2. PASSWORD VISIBILITY TOGGLE ---
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.getElementById('password-toggle');
+
+            passwordToggle.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                passwordToggle.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+            });
+
+            // --- 3. FORM SUBMISSION LOGIC ---
+            const loginForm = document.getElementById('login-form');
+
+            // Define the credentials and target pages based on user request
+            const userDatabase = {
+                student: { username: 'admin@gmail.com', password: 'SRD69', page: 'studentdashboard.html' },
+                faculty: { username: 'admin@gmail.com', password: 'SRD69', page: 'faculty dashboard.html' },
+                admin: { username: 'admin@gmail.com', password: 'SRD69', page: 'AdminPanel.html' },
+                principal: { username: 'admin@gmail.com', password: 'SRD69', page: 'principal.html' }
+            };
+
+            loginForm.addEventListener('submit', (event) => {
+                event.preventDefault(); 
+
+                const selectedRole = document.querySelector('input[name="role"]:checked').value;
+                const username = document.getElementById('email').value.trim(); 
+                const password = document.getElementById('password').value;
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirectUrlFromParam = urlParams.get('redirect');
+
+                const expectedUser = userDatabase[selectedRole];
+
+                if (expectedUser && username === expectedUser.username && password === expectedUser.password) {
+                    alert(`Login successful as ${selectedRole}! Redirecting...`);
+                    
+                    // Priority: 1. URL from parameter (if it exists), 2. Default page for the role.
+                    const finalRedirectUrl = redirectUrlFromParam || expectedUser.page;
+                    
+                    window.location.href = finalRedirectUrl;
+
+                } else {
+                    alert('Invalid username or password for the selected role. Please try again.');
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>

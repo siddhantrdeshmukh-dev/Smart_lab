@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Lab — Analytics & Reports</title>
+
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <meta name="theme-color" content="#0b2340">
+  <style>
+/* =========================
+   THEME, RESET & UTILITIES
+   ========================= */
+:root{
+  --bg-900:#071021; --bg-800:#0b2540; --surface: #0f2b48; --muted:#98a6b3; --text:#eaf3ff;
+  --accent-blue:#4f8cff; --accent-purple:#8b5cf6; --accent-green:#34d399; --accent-red:#ff6b6b; --accent-yellow:#ffd166;
+  --glass: rgba(255,255,255,0.03); --radius:12px; --container:1600px; --ease: cubic-bezier(.2,.9,.3,1);
+}
+html.light{
+  --bg-900:#f7fbff; --bg-800:#eef6ff; --surface:#ffffff; --muted:#6b7280; --text:#0b2340; --glass: rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box}
+body{ margin:0; font-family:"Roboto",sans-serif; background:var(--bg-800); color:var(--text); line-height:1.45; }
+.container{ max-width:var(--container); margin:0 auto; padding:0 20px; }
+.kv{ color:var(--muted); font-size:13px; }
+
+/* =========================
+   LAYOUT & HEADER
+   ========================= */
+.header{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; position:sticky; top:0; z-index:1200; backdrop-filter:blur(6px); background:linear-gradient(180deg,rgba(8,12,20,0.6),rgba(8,12,20,0.35)); border-bottom:1px solid var(--glass); }
+html.light .header{ background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9)); border-bottom:1px solid rgba(0,0,0,0.06); }
+.brand{ display:flex; gap:12px; align-items:center; }
+.logo{ width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-yellow),var(--accent-blue)); color:#fff; font-weight:800; font-family:"Poppins"; }
+
+/* =========================
+   SHARED COMPONENTS
+   ========================= */
+.btn{ border:0; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
+.btn-primary{ background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; }
+.btn-ghost{ background:transparent; border:1px solid var(--glass); color:var(--text); }
+.card{ background:var(--surface); padding:18px; border-radius:var(--radius); border:1px solid var(--glass); box-shadow:0 12px 36px rgba(0,0,0,0.08); }
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px; margin-bottom: 20px; }
+.chart-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(450px, 1fr)); gap:16px; margin-top:16px; }
+.form-control{ padding:8px 12px; border-radius:8px; border:1px solid var(--glass); background:var(--bg-900); color:var(--text); font-family:inherit; }
+
+</style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header container">
+    <div class="brand">
+      <div class="logo">SL</div>
+      <div>
+        <div style="font-weight:700;">Analytics & Reports</div>
+        <div class="kv">Institutional Overview</div>
+      </div>
+    </div>
+    <div>
+        <button id="themeToggle" class="btn btn-ghost"><i class="fa-solid fa-moon"></i></button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="container" style="padding-top:20px;">
+    <!-- Filters -->
+    <div class="card" style="margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <h3 style="margin:0; font-family:'Poppins';">Filters</h3>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <div>
+                    <label class="kv" for="dept-filter">Department: </label>
+                    <select id="dept-filter" class="form-control"></select>
+                </div>
+                <div>
+                    <label class="kv"><input type="checkbox" id="compare-toggle"> Compare with Previous Year</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <div class="card">
+            <div class="kv">Overall Lab Utilization</div>
+            <div id="kpi-utilization" style="font-size:28px; font-weight:800;">-</div>
+        </div>
+        <div class="card">
+            <div class="kv">Total Equipment Value</div>
+            <div id="kpi-equipment-value" style="font-size:28px; font-weight:800;">-</div>
+        </div>
+        <div class="card">
+            <div class="kv">Avg. Student Performance</div>
+            <div id="kpi-student-perf" style="font-size:28px; font-weight:800;">-</div>
+        </div>
+         <div class="card">
+            <div class="kv">Total Faculty</div>
+            <div id="kpi-faculty-count" style="font-size:28px; font-weight:800;">-</div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="card">
+        <h2 style="font-family:'Poppins'; margin-top:0;">Departmental Analytics</h2>
+        <div class="chart-grid">
+            <div>
+                <h3 style="margin-top:0;">Lab Utilization by Department</h3>
+                <canvas id="utilization-chart"></canvas>
+            </div>
+            <div>
+                <h3 style="margin-top:0;">Budget vs. Expenditure</h3>
+                <canvas id="budget-chart"></canvas>
+            </div>
+            <div>
+                <h3 style="margin-top:0;">Student Performance by Department</h3>
+                <canvas id="perf-dept-chart"></canvas>
+            </div>
+            <div>
+                <h3 style="margin-top:0;">Equipment Distribution by Category</h3>
+                <canvas id="equip-dist-chart" style="max-height: 300px; margin: auto;"></canvas>
+            </div>
+            <div>
+                <h3 style="margin-top:0;">Student Admission Trends</h3>
+                <canvas id="admission-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Section for Faculty Research -->
+    <div class="card" style="margin-top:20px;">
+        <h2 style="font-family:'Poppins'; margin-top:0;">Faculty Research Output</h2>
+        <table class="data-table">
+            <thead><tr><th>Faculty Name</th><th>Department</th><th>Publications (Year)</th><th>Citations</th></tr></thead>
+            <tbody id="faculty-research-tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- Reports -->
+    <div class="card" style="margin-top:20px;">
+        <h2 style="font-family:'Poppins'; margin-top:0;">Generate Reports</h2>
+        <p class="kv">Select a report to generate and download for accreditation or review.</p>
+        <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="generateReport('budget')"><i class="fa-solid fa-download"></i> Budget Summary (CSV)</button>
+            <button class="btn btn-ghost" onclick="generateReport('utilization')"><i class="fa-solid fa-download"></i> Resource Utilization (CSV)</button>
+            <button class="btn btn-ghost" onclick="generateReport('faculty')"><i class="fa-solid fa-download"></i> Faculty Workload (CSV)</button>
+            <button class="btn btn-ghost" onclick="generateReport('performance')"><i class="fa-solid fa-download"></i> Student Performance (CSV)</button>
+        </div>
+    </div>
+  </main>
+
+<script>
+(function() {
+    'use strict';
+    /* =========================
+       MOCK DATA
+       ========================= */
+    const departments = [
+        { id: 'ECE', name: 'Electronics & Comm.', budget: 500000, expenditure: 450000, avgPerf: 88, utilization: 85, facultyCount: 10, studentCount: 150, prev_year: { utilization: 82, avgPerf: 87 } },
+        { id: 'CS', name: 'Computer Science', budget: 700000, expenditure: 620000, avgPerf: 91, utilization: 92, facultyCount: 12, studentCount: 200, prev_year: { utilization: 90, avgPerf: 90 } },
+        { id: 'ME', name: 'Mechanical Eng.', budget: 400000, expenditure: 380000, avgPerf: 85, utilization: 78, facultyCount: 9, studentCount: 140, prev_year: { utilization: 79, avgPerf: 84 } },
+        { id: 'EE', name: 'Electrical Eng.', budget: 450000, expenditure: 400000, avgPerf: 86, utilization: 81, facultyCount: 8, studentCount: 130, prev_year: { utilization: 80, avgPerf: 85 } },
+        { id: 'CV', name: 'Civil Eng.', budget: 350000, expenditure: 300000, avgPerf: 84, utilization: 75, facultyCount: 7, studentCount: 120, prev_year: { utilization: 72, avgPerf: 83 } },
+        { id: 'IT', name: 'Information Tech.', budget: 600000, expenditure: 550000, avgPerf: 90, utilization: 89, facultyCount: 11, studentCount: 180, prev_year: { utilization: 85, avgPerf: 89 } },
+        { id: 'BM', name: 'Biomedical Eng.', budget: 480000, expenditure: 420000, avgPerf: 87, utilization: 80, facultyCount: 6, studentCount: 90, prev_year: { utilization: 78, avgPerf: 86 } },
+        { id: 'CH', name: 'Chemical Eng.', budget: 420000, expenditure: 390000, avgPerf: 86, utilization: 79, facultyCount: 7, studentCount: 100, prev_year: { utilization: 75, avgPerf: 85 } },
+        { id: 'AE', name: 'Aerospace Eng.', budget: 550000, expenditure: 510000, avgPerf: 89, utilization: 84, facultyCount: 8, studentCount: 110, prev_year: { utilization: 81, avgPerf: 88 } },
+        { id: 'PE', name: 'Production Eng.', budget: 380000, expenditure: 350000, avgPerf: 83, utilization: 76, facultyCount: 6, studentCount: 95, prev_year: { utilization: 74, avgPerf: 82 } }
+    ];
+
+    const faculty = [
+        { name: 'Dr. Priya Sharma', dept: 'ECE', classes: 4, reportsGraded: 45 }, { name: 'Dr. Rohan Verma', dept: 'CS', classes: 3, reportsGraded: 52 },
+        { name: 'Dr. Anjali Singh', dept: 'ME', classes: 5, reportsGraded: 38 }, { name: 'Dr. Sameer Khan', dept: 'EE', classes: 4, reportsGraded: 41 },
+        { name: 'Dr. Neha Gupta', dept: 'CV', classes: 4, reportsGraded: 35 }, { name: 'Dr. Vikram Rathod', dept: 'IT', classes: 3, reportsGraded: 48 },
+        { name: 'Dr. Sunita Rao', dept: 'BM', classes: 4, reportsGraded: 40 }, { name: 'Dr. Rajesh Singh', dept: 'CH', classes: 5, reportsGraded: 37 },
+        { name: 'Dr. Kavita Nair', dept: 'AE', classes: 4, reportsGraded: 43 }, { name: 'Dr. Manish Patel', dept: 'PE', classes: 4, reportsGraded: 36 },
+        { name: 'Dr. Sneha Reddy', dept: 'CS', classes: 3, reportsGraded: 50 }, { name: 'Dr. Amit Kumar', dept: 'ECE', classes: 4, reportsGraded: 47 },
+        { name: 'Dr. Pooja Mehta', dept: 'ME', classes: 5, reportsGraded: 40 }, { name: 'Dr. Arjun Desai', dept: 'IT', classes: 3, reportsGraded: 49 },
+        { name: 'Dr. Divya Joshi', dept: 'BM', classes: 4, reportsGraded: 41 }, { name: 'Dr. Karan Sharma', dept: 'EE', classes: 4, reportsGraded: 44 },
+        { name: 'Dr. Anjali Iyer', dept: 'CV', classes: 5, reportsGraded: 34 }
+    ];
+    
+    const equipmentDistribution = {
+        'Measurement': 25, 'Computing': 40, 'Mechanical': 20, 'Power Systems': 15, 'Software': 30, 
+        'Biomedical': 18, 'Chemical': 22, 'Aerospace': 19, 'Production': 17
+    };
+    
+    const admissionTrends = {
+        '2021': { ECE: 140, CS: 180, ME: 130, EE: 120, CV: 110, IT: 160, BM: 80, CH: 90, AE: 100, PE: 85 },
+        '2022': { ECE: 145, CS: 190, ME: 135, EE: 125, CV: 115, IT: 170, BM: 85, CH: 95, AE: 105, PE: 90 },
+        '2023': { ECE: 150, CS: 200, ME: 140, EE: 130, CV: 120, IT: 180, BM: 90, CH: 100, AE: 110, PE: 95 },
+        '2024': { ECE: 155, CS: 210, ME: 145, EE: 135, CV: 125, IT: 190, BM: 95, CH: 105, AE: 115, PE: 100 },
+        '2025': { ECE: 160, CS: 220, ME: 150, EE: 140, CV: 130, IT: 200, BM: 100, CH: 110, AE: 120, PE: 105 }
+    };
+    
+    const facultyResearch = [
+        { name: 'Dr. Priya Sharma', dept: 'ECE', publications: 5, citations: 150 },
+        { name: 'Dr. Rohan Verma', dept: 'CS', publications: 8, citations: 320 },
+        { name: 'Dr. Anjali Singh', dept: 'ME', publications: 3, citations: 80 },
+    ];
+
+    // Chart instances
+    let utilizationChart, budgetChart, perfDeptChart, equipDistChart, admissionChart;
+
+    /* =========================
+       INITIALIZATION & THEME
+       ========================= */
+    function init() {
+        setupTheme();
+        populateFilters();
+        addEventListeners();
+        renderAll();
+    }
+
+    function setupTheme() {
+        const themeToggle = document.getElementById('themeToggle');
+        const applyTheme = (theme) => {
+            document.documentElement.classList.toggle('light', theme === 'light');
+        };
+        applyTheme(localStorage.getItem('smartlab-theme'));
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.classList.toggle('light');
+            localStorage.setItem('smartlab-theme', isLight ? 'light' : 'dark');
+        });
+    }
+
+    function addEventListeners() {
+        document.getElementById('dept-filter').addEventListener('change', renderAll);
+        document.getElementById('compare-toggle').addEventListener('change', renderAll);
+    }
+
+    /* =========================
+       RENDERING FUNCTIONS
+       ========================= */
+    function renderAll() {
+        const deptFilter = document.getElementById('dept-filter').value;
+        renderKPIs(deptFilter);
+        renderCharts(deptFilter);
+        renderFacultyResearch(deptFilter);
+    }
+    
+    function populateFilters() {
+        const deptFilter = document.getElementById('dept-filter');
+        deptFilter.innerHTML = '<option value="all">All Departments</option>';
+        departments.forEach(d => {
+            deptFilter.add(new Option(d.name, d.id));
+        });
+    }
+
+    function renderKPIs(filter) {
+        const filteredDepts = filter === 'all' ? departments : departments.filter(d => d.id === filter);
+        const totalUtilization = filteredDepts.reduce((sum, d) => sum + d.utilization, 0) / filteredDepts.length;
+        document.getElementById('kpi-utilization').textContent = `${totalUtilization.toFixed(1)}%`;
+        document.getElementById('kpi-equipment-value').textContent = filter === 'all' ? '₹3.8 Cr' : 'N/A';
+        const avgPerf = filteredDepts.reduce((sum, d) => sum + d.avgPerf, 0) / filteredDepts.length;
+        document.getElementById('kpi-student-perf').textContent = `${avgPerf.toFixed(1)}%`;
+        const facultyCount = filter === 'all' ? faculty.length : faculty.filter(f => f.dept === filter).length;
+        document.getElementById('kpi-faculty-count').textContent = facultyCount;
+    }
+    
+    function renderFacultyResearch(filter) {
+        const tbody = document.getElementById('faculty-research-tbody');
+        tbody.innerHTML = '';
+        const filteredFaculty = filter === 'all' ? facultyResearch : facultyResearch.filter(f => f.dept === filter);
+        filteredFaculty.forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${f.name}</td><td>${f.dept}</td><td>${f.publications}</td><td>${f.citations}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* =========================
+       CHART RENDERING
+       ========================= */
+    function renderCharts(filter) {
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+        const glassColor = getComputedStyle(document.documentElement).getPropertyValue('--glass').trim();
+        const compare = document.getElementById('compare-toggle').checked;
+        const filteredDepts = filter === 'all' ? departments : departments.filter(d => d.id === filter);
+
+        // Utilization Chart
+        const utilCtx = document.getElementById('utilization-chart').getContext('2d');
+        if(utilizationChart) utilizationChart.destroy();
+        utilizationChart = new Chart(utilCtx, {
+            type: 'bar',
+            data: {
+                labels: filteredDepts.map(d => d.name),
+                datasets: [
+                    { label: 'Current Year', data: filteredDepts.map(d => d.utilization), backgroundColor: 'rgba(79, 140, 255, 0.6)' },
+                    compare && { label: 'Previous Year', data: filteredDepts.map(d => d.prev_year.utilization), backgroundColor: 'rgba(255, 255, 255, 0.3)' }
+                ].filter(Boolean)
+            },
+            options: { scales: { y: { beginAtZero: true, max: 100, ticks: {color: textColor}, grid: {color: glassColor} }, x: { ticks: {color: textColor}, grid: {color: glassColor} } }, plugins: { legend: { labels: { color: textColor } } } }
+        });
+
+        // Budget Chart
+        const budgetCtx = document.getElementById('budget-chart').getContext('2d');
+        if(budgetChart) budgetChart.destroy();
+        budgetChart = new Chart(budgetCtx, {
+            type: 'bar',
+            data: {
+                labels: filteredDepts.map(d => d.name),
+                datasets: [
+                    { label: 'Budget', data: filteredDepts.map(d => d.budget), backgroundColor: 'rgba(52, 211, 153, 0.6)' },
+                    { label: 'Expenditure', data: filteredDepts.map(d => d.expenditure), backgroundColor: 'rgba(139, 92, 246, 0.6)' }
+                ]
+            },
+            options: { scales: { y: { ticks: {color: textColor}, grid: {color: glassColor} }, x: { ticks: {color: textColor}, grid: {color: glassColor} } }, plugins: { legend: { labels: { color: textColor } } } }
+        });
+
+        // Performance by Dept Chart
+        const perfCtx = document.getElementById('perf-dept-chart').getContext('2d');
+        if(perfDeptChart) perfDeptChart.destroy();
+        perfDeptChart = new Chart(perfCtx, {
+            type: 'line',
+            data: {
+                labels: filteredDepts.map(d => d.name),
+                datasets: [
+                    { label: 'Current Year', data: filteredDepts.map(d => d.avgPerf), borderColor: 'var(--accent-yellow)', fill: true, backgroundColor: 'rgba(255, 209, 102, 0.2)' },
+                    compare && { label: 'Previous Year', data: filteredDepts.map(d => d.prev_year.avgPerf), borderColor: 'rgba(255, 255, 255, 0.5)', fill: false, borderDash: [5, 5] }
+                ].filter(Boolean)
+            },
+            options: { scales: { y: { beginAtZero: false, max: 100, ticks: {color: textColor}, grid: {color: glassColor} }, x: { ticks: {color: textColor}, grid: {color: glassColor} } }, plugins: { legend: { labels: { color: textColor } } } }
+        });
+        
+        // Equipment Distribution Chart
+        const equipCtx = document.getElementById('equip-dist-chart').getContext('2d');
+        if(equipDistChart) equipDistChart.destroy();
+        equipDistChart = new Chart(equipCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(equipmentDistribution),
+                datasets: [{
+                    data: Object.values(equipmentDistribution),
+                    backgroundColor: ['#4f8cff', '#8b5cf6', '#34d399', '#ff6b6b', '#ffd166', '#f28a2e', '#a855f7', '#22d3ee', '#f87171'],
+                    borderColor: 'var(--surface)',
+                    borderWidth: 4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } }
+        });
+        
+        // Admission Trends Chart
+        const admissionCtx = document.getElementById('admission-chart').getContext('2d');
+        if(admissionChart) admissionChart.destroy();
+        const admissionColors = {'ECE':'#4f8cff', 'CS':'#8b5cf6', 'ME':'#34d399', 'EE':'#ff6b6b', 'CV':'#ffd166', 'IT':'#f28a2e', 'BM':'#a855f7', 'CH':'#22d3ee', 'AE':'#f87171', 'PE':'#eab308'};
+        const admissionDatasets = (filter === 'all' ? departments.map(d => d.id) : [filter]).map(deptId => ({
+            label: departments.find(d => d.id === deptId).name,
+            data: Object.keys(admissionTrends).map(year => admissionTrends[year][deptId]),
+            borderColor: admissionColors[deptId],
+            fill: false
+        }));
+        admissionChart = new Chart(admissionCtx, {
+            type: 'line',
+            data: {
+                labels: Object.keys(admissionTrends),
+                datasets: admissionDatasets
+            },
+            options: { scales: { y: { ticks: {color: textColor}, grid: {color: glassColor} }, x: { ticks: {color: textColor}, grid: {color: glassColor} } }, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } }
+        });
+    }
+
+    /* =========================
+       FUNCTIONAL REPORTS
+       ========================= */
+    window.generateReport = (type) => {
+        let data, filename;
+        const deptFilter = document.getElementById('dept-filter').value;
+        const filteredDepts = deptFilter === 'all' ? departments : departments.filter(d => d.id === deptFilter);
+        const filteredFaculty = deptFilter === 'all' ? faculty : faculty.filter(f => f.dept === deptFilter);
+
+        switch(type) {
+            case 'budget':
+                data = filteredDepts.map(d => ({ department: d.name, budget: d.budget, expenditure: d.expenditure, remaining: d.budget - d.expenditure }));
+                filename = 'budget_summary.csv';
+                break;
+            case 'utilization':
+                data = filteredDepts.map(d => ({ department: d.name, utilization_percent: d.utilization }));
+                filename = 'utilization_report.csv';
+                break;
+            case 'faculty':
+                data = filteredFaculty;
+                filename = 'faculty_workload.csv';
+                break;
+            case 'performance':
+                data = filteredDepts.map(d => ({ department: d.name, average_performance_percent: d.avgPerf }));
+                filename = 'student_performance_summary.csv';
+                break;
+            default:
+                alert('This report type is not available.');
+                return;
+        }
+        
+        downloadCSV(data, filename);
+    };
+
+    function downloadCSV(data, filename) {
+        if (data.length === 0) {
+            alert("No data available for the selected filter.");
+            return;
+        }
+        const headers = Object.keys(data[0]);
+        const csvRows = [
+            headers.join(','),
+            ...data.map(row => headers.map(header => JSON.stringify(row[header])).join(','))
+        ];
+        const csvString = csvRows.join('\n');
+        
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('hidden', '');
+        a.setAttribute('href', url);
+        a.setAttribute('download', filename);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    // Initialize
+    init();
+})();
+</script>
+</body>
+</html>

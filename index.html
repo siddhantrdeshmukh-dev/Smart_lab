@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SMART LAB SYSTEM — Home</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <meta name="theme-color" content="#0b2340">
+
+  <style>
+/* ===============================
+   ROOT THEME VARIABLES
+   =============================== */
+:root{
+  --bg-900: #071021;        /* deep navy */
+  --bg-800: #0b2540;
+  --card: #0f2b48;
+  --muted: #98a6b3;
+  --text: #eaf3ff;
+  --accent-blue: #4f8cff;   /* primary blue */
+  --accent-purple: #8b5cf6; /* purple */
+  --accent-green: #34d399;  /* green highlight */
+  --gold: #ffd166;
+  --glass: rgba(255,255,255,0.03);
+  --radius: 14px;
+  --ease: cubic-bezier(.2,.9,.3,1);
+  --container: 1180px;
+}
+
+/* Light theme variables override */
+html.light {
+  --bg-900: #f7fbff;
+  --bg-800: #eef6ff;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --text: #0b2340;
+  --glass: rgba(0,0,0,0.04);
+}
+
+/* ===============================
+   RESET & BASE
+   =============================== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: "Roboto", system-ui, -apple-system, "Segoe UI", "Poppins", sans-serif;
+  background: linear-gradient(180deg,var(--bg-900), var(--bg-800));
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+}
+
+/* Container */
+.container{ max-width:var(--container); margin:0 auto; padding:0 20px; }
+
+/* Links & buttons */
+a{ color:inherit; text-decoration:none }
+button{ font-family:inherit }
+
+/* ===============================
+   NAVBAR
+   =============================== */
+header{
+  position:sticky; top:0; z-index:1600;
+  background: linear-gradient(180deg, rgba(8,12,20,0.6), rgba(8,12,20,0.35));
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+html.light header{
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.navbar{ height:76px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.brand{ display:flex; align-items:center; gap:12px; }
+.logo{
+  width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(135deg,var(--accent-blue), var(--accent-purple));
+  color:#fff; font-weight:800; font-family:"Poppins";
+  box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+}
+.brand .meta{ font-size:14px; font-weight:700; line-height:1 }
+.brand .sub{ font-size:12px; color:var(--muted) }
+
+nav ul{ display:flex; gap:18px; list-style:none; margin:0; padding:0; align-items:center }
+nav a.nav-link{ padding:8px 10px; border-radius:8px; font-weight:600; color:var(--text) }
+nav a.nav-link:hover{ color:var(--accent-blue); transform:translateY(-3px); transition:all 160ms var(--ease) }
+
+.nav-actions{ display:flex; gap:10px; align-items:center }
+.btn{
+  border:0; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:800;
+  transition: transform 160ms var(--ease), box-shadow 160ms var(--ease);
+}
+.btn:active{ transform: translateY(2px) scale(0.998) }
+.btn-primary{
+  background: linear-gradient(90deg,var(--accent-blue), var(--accent-purple));
+  color:#fff; box-shadow: 0 12px 40px rgba(79,140,255,0.12);
+}
+.btn-ghost{
+  background: transparent; color:var(--text); border:1px solid rgba(255,255,255,0.05); padding:9px 12px;
+}
+
+/* hamburger for small screens */
+.hamburger{ display:none; background:transparent; border:0; color:var(--text); font-size:20px }
+
+/* ===============================
+   HERO (full viewport video)
+   =============================== */
+.hero{
+  position:relative; width:100%; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+
+/* video container positioned absolutely (only in hero) */
+.hero .video-embed{
+  position:absolute; inset:0; z-index:-1; overflow:hidden;
+  /* subtle backdrop */
+  filter: saturate(0.95) contrast(0.95);
+}
+
+/* For YouTube iframe we'll size it to cover */
+.hero .video-embed iframe{
+  position:absolute; left:50%; top:50%; transform: translate(-50%,-50%); min-width:120%; min-height:120%;
+  width:auto; height:auto; pointer-events:none; opacity:0.96,;
+}
+
+/* hero overlay to darken left area so text is readable */
+.hero .overlay{
+  position:absolute; left:0; top:0; height:100%; width:56%; z-index:1;
+  background: linear-gradient(90deg, rgba(2,6,23,0.78) 0%, rgba(2,6,23,0.45) 35%, rgba(2,6,23,0.04) 100%);
+  pointer-events:none;
+}
+html.light .hero .overlay{
+  background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.78) 35%, rgba(255,255,255,0.45) 100%);
+}
+
+/* hero content sits above overlay */
+.hero .hero-content{ position:relative; z-index:2; max-width:1200px; width:100%; padding:0 20px; display:grid; grid-template-columns: 1fr 480px; gap:28px; align-items:center; }
+
+/* left column text */
+.hero .left{ padding:30px 6px; color:var(--text); }
+.hero h1{
+  font-family:"Poppins"; font-size:56px; letter-spacing:0.6px; margin:0 0 12px 0; color:var(--text);
+}
+.hero p.lead{ color:var(--muted); font-size:18px; margin-bottom:10px; max-width:76ch; }
+
+.typewriter{ display:inline-block; color:var(--accent-green); font-weight:800; font-family:"Poppins"; font-size:18px; min-height:26px; white-space:nowrap; border-right:2px solid rgba(255,255,255,0.08); padding-right:8px; }
+
+/* CTA row */
+.cta-row{ margin-top:18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+.cta-row .small-links{ display:flex; gap:8px; align-items:center; margin-left:8px }
+.quick-role{ background: rgba(255,255,255,0.03); padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); color:var(--text); font-weight:700 }
+
+/* right visual card */
+.hero .right{ display:flex; align-items:center; justify-content:center; }
+.visual-card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:18px; padding:18px;
+  width:100%; max-width:460px; box-shadow: 0 26px 80px rgba(0,0,0,0.12); border:1px solid rgba(255,255,255,0.02);
+}
+.visual-snap{ display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; }
+
+/* scroll down arrow */
+.scroll-down{
+  position:absolute; bottom:28px; left:50%; transform:translateX(-50%); z-index:3; opacity:0.9;
+  cursor:pointer; display:flex; align-items:center; gap:8px; color:var(--text);
+  animation: floaty 2.4s ease-in-out infinite;
+}
+@keyframes floaty{ 0%{transform:translate(-50%,0)} 50%{transform:translate(-50%,8px)} 100%{transform:translate(-50%,0)} }
+
+/* ===============================
+   SECTION STYLES
+   =============================== */
+.section{
+  background: transparent; padding:64px 0;
+}
+.section .container{ padding:0 20px; }
+
+.section-title{ font-family:"Poppins"; font-size:28px; color:var(--text); margin-bottom:14px }
+
+/* two-column grid */
+.grid-2{ display:grid; grid-template-columns: 1fr 420px; gap:28px; align-items:center }
+
+/* card */
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding:18px; border-radius:12px; border:1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.08);
+}
+
+/* feature grid */
+.feature-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:16px; margin-top:18px; }
+.feature{ padding:16px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.02); box-shadow:0 12px 36px rgba(0,0,0,0.06) }
+.feature h4{ margin:6px 0 8px 0; font-family:"Poppins" }
+.feature p{ color:var(--muted); font-size:14px }
+
+
+/* ===============================
+   FLIP ANIMATION STYLES
+   =============================== */
+.feature-flip-card, .actor-flip-card {
+  background-color: transparent;
+  min-height: 220px;
+  perspective: 1200px;
+}
+
+.feature-flip-card-inner, .actor-flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  transition: transform 0.7s var(--ease);
+  transform-style: preserve-3d;
+}
+
+.feature-flip-card:hover .feature-flip-card-inner,
+.actor-flip-card:hover .actor-flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.feature-flip-card-front, .feature-flip-card-back,
+.actor-flip-card-front, .actor-flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.feature-flip-card-back, .actor-flip-card-back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.feature-flip-card-back .btn { margin-top: 16px; }
+.actor-flip-card-back .btn { margin-top: 16px; }
+
+
+/* actors grid */
+.actors{ display:grid; grid-template-columns: repeat(3,1fr); gap:16px; margin-top:16px; }
+.actor{ padding:18px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.02); text-align:center }
+.actor h4{ font-family:"Poppins"; margin-bottom:8px }
+
+/* stats counters */
+.stats{ display:grid; grid-template-columns: repeat(4,1fr); gap:12px; margin-top:18px }
+.stat{ padding:16px; border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); text-align:center }
+
+/* testimonials */
+.carousel{ position:relative; margin-top:18px }
+.slides{ display:flex; gap:12px; transition: transform 420ms var(--ease); will-change:transform }
+.slide{ min-width:320px; max-width:360px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:18px; border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.06) }
+
+/* quick links grid */
+.quick-grid{ display:flex; gap:12px; flex-wrap:wrap; margin-top:12px }
+.quick-grid .card{ min-width:220px }
+
+/* CTA large */
+.cta-large{ padding:30px; border-radius:12px; display:flex; gap:12px; align-items:center; justify-content:center; background: linear-gradient(90deg, rgba(79,140,255,0.08), rgba(139,92,246,0.05)); margin-top:20px }
+
+/* footer */
+footer{ padding:28px 0; border-top:1px solid rgba(255,255,255,0.03); margin-top:28px }
+.footer-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:18px }
+
+/* floating helpers */
+.floating{ position:fixed; right:20px; bottom:20px; display:flex; flex-direction:column; gap:12px; z-index:1800 }
+.fab{ width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; background: linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; border:0; cursor:pointer; box-shadow:0 14px 40px rgba(0,0,0,0.18) }
+.fab.alt{ background: linear-gradient(90deg,var(--accent-green), #4cd79f); color:#06212b }
+
+/* reveal helper */
+.fade-up{ opacity:0; transform:translateY(18px); transition: all 520ms var(--ease) }
+.fade-up.show{ opacity:1; transform:none }
+
+/* responsive adjustments */
+@media (max-width:1100px){
+  .hero .hero-content{ grid-template-columns: 1fr; text-align:center }
+  .hero .overlay{ width:100% }
+  .grid-2{ grid-template-columns: 1fr }
+  .feature-grid, .actors { grid-template-columns: repeat(2,1fr) }
+  nav ul{ display:none }
+  .hamburger{ display:inline-block }
+}
+@media (max-width:600px){
+  .feature-grid, .actors { grid-template-columns: 1fr }
+  .stats{ grid-template-columns: 1fr }
+  .slides{ padding-left:8px; overflow:auto }
+  .footer-grid{ grid-template-columns: 1fr }
+  .logo{ width:48px; height:48px }
+  .hero h1{ font-size:32px }
+}
+  </style>
+</head>
+<body>
+  <header role="banner" aria-label="Main Navigation">
+    <div class="container navbar" role="navigation" aria-label="Main">
+      <div class="brand" aria-hidden="false">
+        <div class="logo" aria-hidden="true">SL</div>
+        <div>
+          <div class="meta">Smart Lab System</div>
+          <div class="sub">Engineering lab management</div>
+        </div>
+      </div>
+
+      <nav aria-label="Primary">
+        <ul>
+          <li><a class="nav-link" href="#hero">Home</a></li>
+          <li><a class="nav-link" href="#whats">What's SmartLab?</a></li>
+          <li><a class="nav-link" href="#why">Why SmartLab?</a></li>
+          <li><a class="nav-link" href="#features">Features</a></li>
+          <li><a class="nav-link" href="#actors">People</a></li>
+          <li><a class="nav-link" href="#testimonials">Testimonials</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions" role="group" aria-label="Actions">
+        <button class="btn btn-ghost" onclick="location.href='lear.html'">Learn</button>
+        <button class="btn btn-primary" onclick="location.href='login.html'"><i class="fa-solid fa-right-to-bracket" style="margin-right:8px"></i>Sign In</button>
+        <button id="hamburger" class="hamburger" aria-label="Open menu" onclick="toggleMobileMenu()"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+
+    <div id="mobileMenu" style="display:none;">
+      <div class="container" style="padding:12px 20px;">
+        <a href="#hero" style="display:block; padding:8px 0">Home</a>
+        <a href="#whats" style="display:block; padding:8px 0">What's SmartLab?</a>
+        <a href="#why" style="display:block; padding:8px 0">Why SmartLab?</a>
+        <a href="#features" style="display:block; padding:8px 0">Features</a>
+        <a href="#actors" style="display:block; padding:8px 0">People</a>
+        <a href="#testimonials" style="display:block; padding:8px 0">Testimonials</a>
+        <a href="login.html" style="display:block; padding:8px 0">Sign In</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="hero" class="hero" aria-label="Hero section">
+      <div class="video-embed" aria-hidden="true">
+        <iframe width="560" height="315"
+        src="https://www.youtube.com/embed/YLGPHVYiaMc?autoplay=1&mute=1&start=30&playsinline=1&rel=0"
+        title="YouTube video player"
+        frameborder="0"
+        allow="autoplay; encrypted-media; accelerometer; clipboard-write; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+        </iframe>
+      </div>
+
+      <div class="overlay" aria-hidden="true"></div>
+
+      <div class="container hero-content" role="region" aria-labelledby="heroHeading">
+        <div class="left" id="heroLeft">
+          <div class="eyebrow" style="font-weight:700; margin-bottom:8px; color:#0f2b48; font-size: 20px;"><i class="fa-solid fa-flask" style="color:var(--accent-green); margin-right:8px"></i> Engineering Labs — Smarter</div>
+
+          <h1 id="heroHeading" style="color:#0723c4; font-size: 80px; ">SMART LAB SYSTEM</h1>
+
+          <p class="lead" style="color:#0f2b48; font-size: 20px;">.</p>
+
+          <div style="margin-top:8px">
+            <span style="color:var(--muted); margin-right:30px; font-size: 30px;">Capabilities:</span>
+            <span id="typewriter" class="typewriter" aria-live="polite" aria-atomic="true" style="font-size: 30px;"></span>
+          </div>
+
+          <div class="cta-row" style="margin-top:18px">
+            <button class="btn btn-primary" onclick="location.href='sighnup.html'">See System in Action</button>
+            <button class="btn btn-ghost" onclick="location.href='login.html'">Principal</button>
+
+            <div class="small-links" aria-hidden="false" style="margin-left:8px">
+              <a class="quick-role" href="login.html">Student</a>
+              <a class="quick-role" href="login.html">Faculty</a>
+              <a class="quick-role" href="login.html">Lab Assist</a>
+            </div>
+          </div>
+
+          <div style="margin-top:16px; color:var(--muted); font-size:13px">
+            Built for engineering education • Accessible • Scalable
+          </div>
+        </div>
+
+        <div style="margin-top:12px; border-radius:10px; overflow:hidden;">
+              <img src="assets/images/hero-illustration.png" alt="Hero Illustration" onerror="this.style.display='none'" style="width:100%; display:block">
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="scroll-down" role="button" aria-label="Scroll to next section" onclick="document.querySelector('#whats').scrollIntoView({behavior:'smooth'})">
+        <i class="fa-solid fa-chevron-down" style="font-size:18px;"></i>
+        <div style="font-size:13px; color:var(--muted); margin-left:6px">Scroll</div>
+      </div>
+    </section>
+
+    <section id="whats" class="section" aria-labelledby="whatsTitle">
+      <div class="container">
+        <h2 id="whatsTitle" class="section-title">What's SmartLab?</h2>
+
+        <div class="grid-2">
+          <div class="card fade-up">
+            <p style="color:var(--muted); font-size:16px">
+              SmartLab is a unified platform that simplifies laboratory operations in engineering colleges. Schedule practical sessions, track equipment with QR codes, automate attendance, and generate institutional reports — all in a secure, role-based system.
+            </p>
+
+            <ul style="margin-top:16px; color:var(--muted); line-height:1.7">
+              <li><strong>Role-based dashboards</strong> for Students, Faculty, Lab Assistants, Admins and Principals.</li>
+              <li><strong>QR & Inventory</strong> tracking for equipment lifecycle and maintenance history.</li>
+              <li><strong>Analytics</strong> and exportable reports for data-driven decision-making.</li>
+            </ul>
+
+            <div style="margin-top:14px">
+              <a class="btn btn-primary" href="about.html">Learn more</a>
+            </div>
+          </div>
+
+          <div class="card fade-up" aria-hidden="true">
+            <img src="C:\Users\Siddhant\Desktop\smart lab system\images\lab1.webp" alt="What's SmartLab" onerror="this.style.display='none'" style="width:100%; border-radius:10px">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="why" class="section" aria-labelledby="whyTitle">
+      <div class="container">
+        <h2 id="whyTitle" class="section-title">Why SmartLab?</h2>
+
+        <div class="grid-2">
+          <div class="card fade-up" aria-hidden="true">
+            <img src="C:\Users\Siddhant\Desktop\smart lab system\images\lab2.webp" alt="Why SmartLab" onerror="this.style.display='none'" style="width:80%; border-radius:10px">
+          </div>
+
+          <div class="card fade-up">
+            <h3 style="font-family:'Poppins'">Built for institutions — from students to principal</h3>
+            <ul style="margin-top:12px; color:var(--muted); line-height:1.7">
+              <li><strong>Save faculty time</strong> by automating attendance & schedule approvals.</li>
+              <li><strong>Improve utilization</strong> by eliminating booking conflicts and idle equipment.</li>
+              <li><strong>Prevent equipment loss</strong> with QR-based checkouts and maintenance logs.</li>
+              <li><strong>Support decisions</strong> with consolidated analytics for budgets, utilization, and performance.</li>
+            </ul>
+
+            <div style="margin-top:14px">
+              <a class="btn btn-ghost" href="why-smartlab.html">Why choose SmartLab?</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <br>
+    <br>
+    <br>
+    <section id="features" class="section" aria-labelledby="featuresTitle">
+      <div class="container">
+        <h2 id="featuresTitle" class="section-title">Core Features & Use Cases</h2>
+        <br>
+        <br>
+        <div class="feature-grid">
+          
+          <div class="feature-flip-card fade-up">
+            <div class="feature-flip-card-inner">
+              <div class="feature-flip-card-front feature">
+                <div style="display:flex; gap:12px; align-items:flex-start;">
+                  <div style="width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple))"><i class="fa-solid fa-calendar-days"></i></div>
+                  <div>
+                    <h4>Smart Scheduling</h4>
+                    <p>Book classrooms and lab benches with conflict-free scheduling and automated reminders.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-flip-card-back feature">
+                <h4>Advanced Scheduling</h4>
+                <p>Our system prevents double-bookings, helps find free slots instantly, and sends automated reminders to ensure maximum lab utilization.</p>
+                <a href="smartscheduling.html" class="btn btn-ghost">View Details</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-flip-card fade-up">
+            <div class="feature-flip-card-inner">
+              <div class="feature-flip-card-front feature">
+                <div style="display:flex; gap:12px; align-items:flex-start;">
+                  <div style="width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; background:linear-gradient(90deg,var(--accent-green),#60d36b)"><i class="fa-solid fa-qrcode"></i></div>
+                  <div>
+                    <h4>QR Inventory</h4>
+                    <p>Scan-to-check-out for equipment, track serials, and maintain repair logs.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-flip-card-back feature">
+                <h4>Effortless Tracking</h4>
+                <p>A quick scan is all it takes to check items in or out, view their complete history, and log maintenance requests. Say goodbye to lost assets.</p>
+                <a href="inverntry managment.html" class="btn btn-ghost">View Details</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-flip-card fade-up">
+            <div class="feature-flip-card-inner">
+              <div class="feature-flip-card-front feature">
+                <div style="display:flex; gap:12px; align-items:flex-start;">
+                  <div style="width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#111; background:linear-gradient(90deg,var(--gold), #ffd380)"><i class="fa-solid fa-chart-line"></i></div>
+                  <div>
+                    <h4>Analytics & Reports</h4>
+                    <p>Export utilization and budget reports for principals and admin staff.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-flip-card-back feature">
+                <h4>Data-Driven Decisions</h4>
+                <p>Generate comprehensive reports on lab usage, equipment health, and student attendance with a single click to inform budgets and planning.</p>
+                <a href="analytical.html" class="btn btn-ghost">View Details</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-flip-card fade-up">
+            <div class="feature-flip-card-inner">
+              <div class="feature-flip-card-front feature">
+                <div style="display:flex; gap:12px; align-items:flex-start;">
+                  <div style="width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; background:linear-gradient(90deg,#a78bfa,#7c5cff)"><i class="fa-solid fa-wrench"></i></div>
+                  <div>
+                    <h4>Maintenance Logs</h4>
+                    <p>Track maintenance requests, vendor interactions, and preventive schedules.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-flip-card-back feature">
+                <h4>Minimize Downtime</h4>
+                <p>A centralized system to log faults, track repair status, and schedule preventive maintenance, extending the life of your equipment.</p>
+                <a href="#" class="btn btn-ghost">View Details</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-flip-card fade-up">
+            <div class="feature-flip-card-inner">
+              <div class="feature-flip-card-front feature">
+                <div style="display:flex; gap:12px; align-items:flex-start;">
+                  <div style="width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; background:linear-gradient(90deg,#56ccf2,#2f9dff)"><i class="fa-solid fa-bell"></i></div>
+                  <div>
+                    <h4>Smart Notifications</h4>
+                    <p>Email, SMS and in-app alerts for bookings, returns and critical maintenance.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-flip-card-back feature">
+                <h4>Keep Everyone Informed</h4>
+                <p>Automated alerts for booking confirmations, overdue equipment reminders, and urgent maintenance updates via SMS, email, and in-app.</p>
+                <a href="#" class="btn btn-ghost">View Details</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-flip-card fade-up">
+            <div class="feature-flip-card-inner">
+              <div class="feature-flip-card-front feature">
+                <div style="display:flex; gap:12px; align-items:flex-start;">
+                  <div style="width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; background:linear-gradient(90deg,#34d399,#10b981)"><i class="fa-solid fa-user-check"></i></div>
+                  <div>
+                    <h4>Secure Access</h4>
+                    <p>Role-based authentication and audit logs for all actions in the system.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-flip-card-back feature">
+                <h4>Total Accountability</h4>
+                <p>With granular permissions, users only see what they need to. Every action is logged, ensuring complete security and accountability.</p>
+                <a href="#" class="btn btn-ghost">View Details</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="actors" class="section" aria-labelledby="actorsTitle">
+      <div class="container">
+        <h2 id="actorsTitle" class="section-title">Who uses SmartLab?</h2>
+
+        <div class="actors">
+          <div class="actor-flip-card fade-up">
+            <div class="actor-flip-card-inner">
+              <div class="actor-flip-card-front actor">
+                <h4>Students</h4>
+                <p class="muted">Book labs, submit reports, view schedules, and access learning resources.</p>
+                <div style="margin-top:10px; font-size:12px; color: var(--accent-blue);">Hover to see more</div>
+              </div>
+              <div class="actor-flip-card-back actor">
+                <i class="fa-solid fa-user-graduate" style="font-size: 48px; color: var(--accent-green);"></i>
+                <a class="btn btn-ghost" href="studentdashboard.html">Open Student Portal</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="actor-flip-card fade-up">
+            <div class="actor-flip-card-inner">
+              <div class="actor-flip-card-front actor">
+                <h4>Faculty</h4>
+                <p class="muted">Approve bookings, review lab reports, and monitor live attendance.</p>
+                <div style="margin-top:10px; font-size:12px; color: var(--accent-blue);">Hover to see more</div>
+              </div>
+              <div class="actor-flip-card-back actor">
+                <i class="fa-solid fa-user-tie" style="font-size: 48px; color: var(--accent-purple);"></i>
+                <a class="btn btn-ghost" href="faculty dashboard.html">Open Faculty Dashboard</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="actor-flip-card fade-up">
+            <div class="actor-flip-card-inner">
+              <div class="actor-flip-card-front actor">
+                <h4>Lab Assistants</h4>
+                <p class="muted">Update equipment status, record maintenance, and manage inventory.</p>
+                <div style="margin-top:10px; font-size:12px; color: var(--accent-blue);">Hover to see more</div>
+              </div>
+              <div class="actor-flip-card-back actor">
+                <i class="fa-solid fa-hard-hat" style="font-size: 48px; color: var(--gold);"></i>
+                <a class="btn btn-ghost" href="lab assistance.html">Open Assist Panel</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="actor-flip-card fade-up">
+            <div class="actor-flip-card-inner">
+              <div class="actor-flip-card-front actor">
+                <h4>Principal</h4>
+                <p class="muted">High-level reports, utilization dashboards, and budget approvals.</p>
+                <div style="margin-top:10px; font-size:12px; color: var(--accent-blue);">Hover to see more</div>
+              </div>
+              <div class="actor-flip-card-back actor">
+                <i class="fa-solid fa-sitemap" style="font-size: 48px; color: var(--accent-blue);"></i>
+                <a class="btn btn-ghost" href="principal.html">Principal View</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="actor-flip-card fade-up">
+            <div class="actor-flip-card-inner">
+              <div class="actor-flip-card-front actor">
+                <h4>Admin</h4>
+                <p class="muted">User management, policies, and system configuration.</p>
+                <div style="margin-top:10px; font-size:12px; color: var(--accent-blue);">Hover to see more</div>
+              </div>
+              <div class="actor-flip-card-back actor">
+                <i class="fa-solid fa-user-shield" style="font-size: 48px; color: var(--accent-green);"></i>
+                <a class="btn btn-ghost" href="AdminPanel.html">Open Admin Panel</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="actor-flip-card fade-up">
+            <div class="actor-flip-card-inner">
+              <div class="actor-flip-card-front actor">
+                <h4>External</h4>
+                <p class="muted">Industry partners and prospective collaborators can request demos and pilots.</p>
+                <div style="margin-top:10px; font-size:12px; color: var(--accent-blue);">Hover to see more</div>
+              </div>
+              <div class="actor-flip-card-back actor">
+                <i class="fa-solid fa-handshake" style="font-size: 48px; color: var(--accent-purple);"></i>
+                <a class="btn btn-ghost" href="external.html">Contact Sales</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-label="Project metrics">
+      <div class="container">
+        <h2 class="section-title">Project Metrics</h2>
+
+        <div class="stats">
+          <div class="stat fade-up">
+            <div class="num" data-target="12" style="font-family:'Poppins'; font-size:28px; color:var(--accent-blue)">0</div>
+            <div class="muted">Labs Managed</div>
+          </div>
+
+          <div class="stat fade-up">
+            <div class="num" data-target="1000" style="font-family:'Poppins'; font-size:28px; color:var(--accent-green)">0</div>
+            <div class="muted">Students</div>
+          </div>
+
+          <div class="stat fade-up">
+            <div class="num" data-target="300" style="font-family:'Poppins'; font-size:28px; color:var(--gold)">0</div>
+            <div class="muted">Equipment Items</div>
+          </div>
+
+          <div class="stat fade-up">
+            <div class="num" data-target="500" style="font-family:'Poppins'; font-size:28px; color:var(--accent-purple)">0</div>
+            <div class="muted">Reports Generated</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials" class="section" aria-labelledby="testimonialsTitle">
+      <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <h2 id="testimonialsTitle" class="section-title">What users say</h2>
+          <div class="muted" style="font-size:13px">Auto-play • Pause on hover</div>
+        </div>
+
+        <div class="carousel" id="carousel">
+          <div class="slides" id="slides" aria-live="polite">
+            <div class="slide">
+              <div style="display:flex; gap:12px; align-items:center">
+                <img src="assets/images/user1.jpg" alt="User 1" style="width:72px;height:72px;border-radius:50%;object-fit:cover" onerror="this.style.display='none'">
+                <div>
+                  <div style="font-weight:700">Aisha — Student</div>
+                  <div class="muted" style="font-size:13px">"Booking and submissions are faster now."</div>
+                </div>
+              </div>
+              <p style="margin-top:12px; font-weight:600">“SmartLab removed the friction from practical scheduling. Students love the clarity.”</p>
+            </div>
+
+            <div class="slide">
+              <div style="display:flex; gap:12px; align-items:center">
+                <img src="assets/images/user2.jpg" alt="User 2" style="width:72px;height:72px;border-radius:50%;object-fit:cover" onerror="this.style.display='none'">
+                <div>
+                  <div style="font-weight:700">Dr. Rao — Faculty</div>
+                  <div class="muted" style="font-size:13px">"Attendance integration saved hours each week."</div>
+                </div>
+              </div>
+              <p style="margin-top:12px; font-weight:600">“I like the live attendance and simple report workflow.”</p>
+            </div>
+
+            <div class="slide">
+              <div style="display:flex; gap:12px; align-items:center">
+                <img src="assets/images/user3.jpg" alt="User 3" style="width:72px;height:72px;border-radius:50%;object-fit:cover" onerror="this.style.display='none'">
+                <div>
+                  <div style="font-weight:700">Ravi — Lab Assist</div>
+                  <div class="muted" style="font-size:13px">"Inventory tracking is reliable and simple."</div>
+                </div>
+              </div>
+              <p style="margin-top:12px; font-weight:600">“QR scanning and maintenance logs cut down confusion.”</p>
+            </div>
+          </div>
+
+          <div class="carousel-nav" style="position:absolute; right:8px; top:8px; display:flex; gap:8px">
+            <button id="prev" class="btn btn-ghost" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+            <button id="next" class="btn btn-ghost" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="quickTitle">
+      <div class="container">
+        <h2 id="quickTitle" class="section-title">Quick Access</h2>
+
+        <div class="quick-grid" role="list">
+          <a class="card fade-up" href="faculty dashboard.html">
+            <div><i class="fa-solid fa-chalkboard-user" style="font-size:22px; color:var(--accent-blue)"></i></div>
+            <div style="font-weight:800; margin-top:8px">Faculty Dashboard</div>
+            <div class="muted">Live attendance & reports</div>
+          </a>
+
+          <a class="card fade-up" href="lab assistance.html">
+            <div><i class="fa-solid fa-wrench" style="font-size:22px; color:var(--accent-purple)"></i></div>
+            <div style="font-weight:800; margin-top:8px">Lab Assistant Panel</div>
+            <div class="muted">Equipment & maintenance</div>
+          </a>
+
+          <a class="card fade-up" href="studentdashboard.html">
+            <div><i class="fa-solid fa-user-graduate" style="font-size:22px; color:var(--accent-green)"></i></div>
+            <div style="font-weight:800; margin-top:8px">Student Dashboard</div>
+            <div class="muted">Reports & schedule</div>
+          </a>
+
+          <a class="card fade-up" href="principal.html">
+            <div><i class="fa-solid fa-building-columns" style="font-size:22px; color:var(--gold)"></i></div>
+            <div style="font-weight:800; margin-top:8px">Principal Dashboard</div>
+            <div class="muted">High-level insights & budget</div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container cta-large fade-up">
+        <div style="text-align:center">
+          <div style="font-size:20px; font-weight:800; margin-bottom:8px">Ready to modernize your labs?</div>
+          <div style="color:var(--muted); margin-bottom:12px">Sign up for a demo or contact our team to plan a pilot at your institution.</div>
+          <div style="display:flex; gap:12px; justify-content:center">
+            <a class="btn btn-primary" href="sighnup.html">Get Started</a>
+            <a class="btn btn-ghost" href="external.html">Contact Sales</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer role="contentinfo" aria-label="Footer">
+      <div class="container footer-grid fade-up">
+        <div>
+          <strong>Smart Laboratory Management System</strong>
+          <div class="muted" style="margin-top:8px">Final Year Project • Engineering • 2025</div>
+        </div>
+
+        <div>
+          <strong>Quick Links</strong>
+          <div class="muted" style="margin-top:8px">
+            <a href="#whats">What's SmartLab?</a><br/>
+            <a href="#features">Features</a><br/>
+            <a href="login.html">Sign In</a>
+          </div>
+        </div>
+
+        <div>
+          <strong>Contact</strong>
+          <div class="muted" style="margin-top:8px">smartlab@college.edu<br/>+91 12345 67890</div>
+        </div>
+      </div>
+    </footer>
+
+    <div class="floating" aria-hidden="true">
+      <button id="scrollTop" class="fab" title="Scroll to top" aria-label="Scroll to top"><i class="fa-solid fa-arrow-up"></i></button>
+      <button id="themeToggle" class="fab alt" title="Toggle theme" aria-label="Toggle theme"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
+    </div>
+  </main>
+
+  <script>
+  (function(){
+    'use strict';
+
+    /* -------------------------
+       Mobile menu
+       ------------------------- */
+    function toggleMobileMenu(){
+      const m = document.getElementById('mobileMenu');
+      m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+    }
+    window.toggleMobileMenu = toggleMobileMenu;
+
+    /* -------------------------
+       THEME: dark/light persisted
+       ------------------------- */
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const savedTheme = localStorage.getItem('smartlab-theme');
+    if(savedTheme === 'light'){ document.documentElement.classList.add('light'); themeIcon.className = 'fa-solid fa-sun'; }
+    else { document.documentElement.classList.remove('light'); themeIcon.className = 'fa-solid fa-moon'; }
+
+    themeToggle.addEventListener('click', ()=>{
+      const isLight = document.documentElement.classList.toggle('light');
+      themeIcon.className = isLight ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      localStorage.setItem('smartlab-theme', isLight ? 'light' : 'dark');
+    });
+
+    /* -------------------------
+       TYPEWRITER: randomized loop phrases
+       ------------------------- */
+    const phrases = [
+      "Automate Lab Scheduling",
+      "Track Inventory in Real-Time",
+      "Generate Instant Reports",
+      "Request Equipment Online",
+      "Approve Bookings in Seconds",
+      "Monitor Usage Analytics",
+      "Reduce Manual Errors",
+      "Smart Notifications & Alerts",
+      "Secure User Access",
+      "Maintain Equipment History",
+      "Faculty-Friendly Dashboard",
+      "Save Time & Improve Efficiency"
+    ];
+
+    // shuffle utility (Fisher-Yates)
+    function shuffle(arr){
+      const a = arr.slice();
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      return a;
+    }
+
+    const typeEl = document.getElementById('typewriter');
+    let queue = shuffle(phrases);
+    let current = '';
+    let charIdx = 0;
+    let deleting = false;
+    let cycleDelay = 1300;
+
+    function typeTick(){
+      if(!current) current = queue.shift();
+      if(!current) { queue = shuffle(phrases); current = queue.shift(); }
+      if(!deleting){
+        charIdx++;
+        typeEl.textContent = current.slice(0, charIdx);
+        if(charIdx >= current.length){ deleting = true; setTimeout(typeTick, cycleDelay); return; }
+        setTimeout(typeTick, 70 + Math.random()*60);
+      } else {
+        charIdx--;
+        typeEl.textContent = current.slice(0, charIdx);
+        if(charIdx <= 0){ deleting = false; current = ''; setTimeout(typeTick, 300); return; }
+        setTimeout(typeTick, 30 + Math.random()*30);
+      }
+    }
+    setTimeout(typeTick, 700);
+
+    /* -------------------------
+       COUNTERS (animate when visible)
+       ------------------------- */
+    const counters = document.querySelectorAll('.num');
+    let countersDone = false;
+    function animateCounters(){
+      if(countersDone) return;
+      const statsSection = document.querySelector('.stats');
+      if(!statsSection) return;
+      const r = statsSection.getBoundingClientRect();
+      if(r.top < window.innerHeight - 60){
+        counters.forEach(el => {
+          const target = parseInt(el.getAttribute('data-target') || '0',10);
+          let cur = 0;
+          const step = Math.max(1, Math.floor(target / 120));
+          const id = setInterval(()=> {
+            cur += step;
+            if(cur >= target){ el.textContent = target.toLocaleString(); clearInterval(id); }
+            else el.textContent = cur.toLocaleString();
+          }, 12);
+        });
+        countersDone = true;
+      }
+    }
+    window.addEventListener('scroll', animateCounters);
+    setTimeout(animateCounters, 600);
+
+    /* -------------------------
+       TESTIMONIALS CAROUSEL
+       ------------------------- */
+    const slidesWrap = document.getElementById('slides');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    let slideIndex = 0;
+    function updateSlides(){
+      const slideWidth = 344; // match CSS approx
+      slidesWrap.style.transform = `translateX(${-slideIndex * (slideWidth + 12)}px)`;
+    }
+    function nextSlide(){ slideIndex = (slideIndex + 1) % slidesWrap.children.length; updateSlides(); }
+    function prevSlide(){ slideIndex = (slideIndex - 1 + slidesWrap.children.length) % slidesWrap.children.length; updateSlides(); }
+    if(nextBtn) nextBtn.addEventListener('click', nextSlide);
+    if(prevBtn) prevBtn.addEventListener('click', prevSlide);
+
+    // autoplay
+    let carouselAuto = setInterval(nextSlide, 3800);
+    const carouselNode = document.getElementById('carousel');
+    if(carouselNode){
+      carouselNode.addEventListener('mouseenter', ()=> clearInterval(carouselAuto));
+      carouselNode.addEventListener('mouseleave', ()=> carouselAuto = setInterval(nextSlide, 3800));
+    }
+
+    /* ===========================
+       REVEAL ON SCROLL (IntersectionObserver)
+       =========================== */
+    const revealEls = document.querySelectorAll('.fade-up');
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){ entry.target.classList.add('show'); io.unobserve(entry.target); }
+      });
+    }, { threshold: 0.16 });
+    revealEls.forEach(el => io.observe(el));
+
+    /* -------------------------
+       SCROLL-TO-TOP FAB
+       ------------------------- */
+    const scrollTopBtn = document.getElementById('scrollTop');
+    window.addEventListener('scroll', ()=>{
+      if(window.scrollY > 300) scrollTopBtn.style.display = 'flex'; else scrollTopBtn.style.display = 'none';
+    });
+    scrollTopBtn.addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
+
+    /* -------------------------
+       PRELOAD IMAGES (small optimization)
+       ------------------------- */
+    ['assets/images/hero-illustration.png','assets/images/whats-smartlab.jpg','assets/images/why-smartlab.jpg'].forEach(src=>{
+      const img = new Image(); img.src = src;
+    });
+
+    /* -------------------------
+       YOUTUBE BACKGROUND: create iframe in .video-embed
+       Replace YT_VIDEO_ID variable below with your YouTube VIDEO ID (only the ID!)
+       Example YouTube URL: https://www.youtube.com/watch?v=AbCdEfGh123
+       VIDEO ID = AbCdEfGh123
+       Set: const YT_VIDEO_ID = 'AbCdEfGh123';
+    ------------------------- */
+    (function createYouTubeBackground(){
+      // *********************** PASTE YOUR YOUTUBE VIDEO ID HERE ***********************
+      const YT_VIDEO_ID = ''; // <-- REPLACE: paste only the YouTube video ID string here, e.g. 'AbCdEfGh123'
+      // If empty, no video will be shown. To use a self-hosted MP4 instead, replace the .video-embed innerHTML with a <video> tag.
+      // *******************************************************************************
+      if(!YT_VIDEO_ID) {
+        // Optional: fallback - show a static background image if available
+        const wrapper = document.querySelector('.video-embed');
+        wrapper.style.backgroundImage = "url('assets/images/hero-fallback.jpg')";
+        wrapper.style.backgroundSize = "cover";
+        wrapper.style.backgroundPosition = "center";
+        return;
+      }
+
+      // privacy-enhanced youtube-nocookie domain, autoplay muted loop
+      const src = `https://www.youtube-nocookie.com/embed/${YT_VIDEO_ID}?autoplay=1&mute=1&controls=0&loop=1&playlist=${YT_VIDEO_ID}&modestbranding=1&rel=0&iv_load_policy=3`;
+      const iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.width = '1600';
+      iframe.height = '900';
+      iframe.frameBorder = '0';
+      iframe.allow = 'autoplay; fullscreen';
+      iframe.allowFullscreen = true;
+      iframe.title = 'Smart Lab background video';
+      iframe.style.pointerEvents = 'none';
+      iframe.style.opacity = '0.96';
+      iframe.style.position = 'absolute';
+      iframe.style.left = '50%';
+      iframe.style.top = '50%';
+      iframe.style.transform = 'translate(-50%,-50%)';
+      iframe.style.minWidth = '120%';
+      iframe.style.minHeight = '120%';
+      document.querySelector('.video-embed').appendChild(iframe);
+    })();
+
+    /* -------------------------
+       Accessibility: keyboard to toggle theme (T)
+       ------------------------- */
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 't' || e.key === 'T') themeToggle.click();
+    });
+
+    // End IIFE
+  })();
+  </script>
+</body>
+</html>

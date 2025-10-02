@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Lab — Principal's Dashboard</title>
+
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <meta name="theme-color" content="#0b2340">
+  <style>
+/* =========================
+   THEME, RESET & UTILITIES
+   ========================= */
+:root{
+  --bg-900:#071021; --bg-800:#0b2540; --surface: #0f2b48; --muted:#98a6b3; --text:#eaf3ff;
+  --accent-blue:#4f8cff; --accent-purple:#8b5cf6; --accent-green:#34d399; --accent-red:#ff6b6b; --accent-yellow:#ffd166;
+  --glass: rgba(255,255,255,0.03); --radius:12px; --container:1400px; --ease: cubic-bezier(.2,.9,.3,1);
+}
+html.light{
+  --bg-900:#f7fbff; --bg-800:#eef6ff; --surface:#ffffff; --muted:#6b7280; --text:#0b2340; --glass: rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box}
+body{ margin:0; font-family:"Roboto",sans-serif; background:var(--bg-800); color:var(--text); line-height:1.45; }
+.container{ max-width:var(--container); margin:0 auto; padding:0 20px; }
+.kv{ color:var(--muted); font-size:13px; }
+.hidden{ display:none!important; }
+.fade-in{ opacity:0; transform:translateY(12px); transition: all 520ms var(--ease); }
+.fade-in.show{ opacity:1; transform:none }
+
+/* =========================
+   LAYOUT & HEADER
+   ========================= */
+.header{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; position:sticky; top:0; z-index:1200; backdrop-filter:blur(6px); background:linear-gradient(180deg,rgba(8,12,20,0.6),rgba(8,12,20,0.35)); border-bottom:1px solid var(--glass); }
+html.light .header{ background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9)); border-bottom:1px solid rgba(0,0,0,0.06); }
+.brand{ display:flex; gap:12px; align-items:center; }
+.logo{ width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-yellow),var(--accent-purple)); color:#fff; font-weight:800; font-family:"Poppins"; }
+.dashboard-wrap{ display:grid; grid-template-columns:260px 1fr; gap:20px; padding:20px 0; }
+.sidebar{ position:sticky; top:84px; height:calc(100vh - 120px); padding:18px; border-radius:var(--radius); background:var(--surface); border:1px solid var(--glass); box-shadow:0 12px 36px rgba(0,0,0,0.12); display:flex; flex-direction:column; gap:12px; }
+.content{ padding:0; }
+
+/* =========================
+   SHARED COMPONENTS
+   ========================= */
+.btn{ border:0; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
+.btn-primary{ background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; }
+.btn-ghost{ background:transparent; border:1px solid var(--glass); color:var(--text); }
+.btn-approve{ background:var(--accent-green); color:#fff; }
+.btn-reject{ background:var(--accent-red); color:#fff; }
+.card{ background:var(--surface); padding:18px; border-radius:var(--radius); border:1px solid var(--glass); box-shadow:0 12px 36px rgba(0,0,0,0.08); }
+.tab-btn{ display:flex; gap:12px; align-items:center; padding:12px; border-radius:10px; font-weight:700; cursor:pointer; background:transparent; border:0; color:var(--text); width:100%; text-align:left; }
+.tab-btn[aria-selected="true"]{ background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; }
+.data-table{ width:100%; border-collapse:collapse; margin-top:12px; }
+.data-table th, .data-table td{ padding:12px; text-align:left; border-bottom:1px solid var(--glass); }
+.data-table th{ font-size:13px; color:var(--muted); }
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px; }
+.chart-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(400px, 1fr)); gap:16px; margin-top:16px; }
+.setting-group{ margin-top:16px; }
+.form-control{ width:100%; padding:10px; border-radius:8px; border:1px solid var(--glass); background:var(--bg-900); color:var(--text); font-family:inherit; }
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media(max-width:1200px){
+  .chart-grid{ grid-template-columns:1fr; }
+}
+@media(max-width:980px){
+  .dashboard-wrap{ grid-template-columns:1fr; }
+  .sidebar{ position:relative; top:0; height:auto; flex-direction:row; overflow-x:auto; }
+  .tab-btn{ flex-direction:column; gap:4px; font-size:12px; }
+}
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header container">
+    <div class="brand">
+      <div class="logo">SL</div>
+      <div>
+        <div style="font-weight:700;">Principal's Dashboard</div>
+        <div class="kv">Smart Laboratory System</div>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-weight:800" id="principal-name">Dr. Sandip Joshi</div>
+      <div class="kv">Principal</div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="container dashboard-wrap">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <button class="tab-btn" data-tab="overview" aria-selected="true"><i class="fa-solid fa-chart-pie"></i> Overview</button>
+      <button class="tab-btn" data-tab="analytics"><i class="fa-solid fa-magnifying-glass-chart"></i> Analytics</button>
+      <button class="tab-btn" data-tab="faculty"><i class="fa-solid fa-chalkboard-user"></i> Faculty</button>
+      <button class="tab-btn" data-tab="approvals"><i class="fa-solid fa-stamp"></i> Approvals</button>
+      <button class="tab-btn" data-tab="reports"><i class="fa-solid fa-file-invoice"></i> Reports</button>
+      <div style="margin-top:auto"></div>
+      <button class="tab-btn" data-tab="settings"><i class="fa-solid fa-cog"></i> Settings</button>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <section class="content">
+      <div id="tabContainer">
+
+        <!-- Overview -->
+        <div class="tab-panel fade-in show" id="panel-overview">
+          <h2 style="font-family:'Poppins'; margin-top:0;">Institutional Overview</h2>
+          <div class="kpi-grid">
+            <div class="card">
+                <div class="kv">Overall Lab Utilization</div>
+                <div id="kpi-utilization" style="font-size:28px; font-weight:800;">-</div>
+            </div>
+            <div class="card">
+                <div class="kv">Total Equipment Value</div>
+                <div id="kpi-equipment-value" style="font-size:28px; font-weight:800;">-</div>
+            </div>
+            <div class="card">
+                <div class="kv">Avg. Student Performance</div>
+                <div id="kpi-student-perf" style="font-size:28px; font-weight:800;">-</div>
+            </div>
+             <div class="card">
+                <div class="kv">Pending Approvals</div>
+                <div id="kpi-pending-approvals" style="font-size:28px; font-weight:800;">-</div>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <div class="card">
+                <h3 style="margin-top:0;">Lab Utilization by Department</h3>
+                <canvas id="utilization-chart"></canvas>
+            </div>
+            <div class="card">
+                <h3 style="margin-top:0;">Budget vs. Expenditure</h3>
+                <canvas id="budget-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics -->
+        <div class="tab-panel fade-in hidden" id="panel-analytics">
+            <h2 style="font-family:'Poppins'; margin-top:0;">Departmental Analytics</h2>
+            <div class="chart-grid">
+                <div class="card">
+                    <h3 style="margin-top:0;">Student Performance by Department</h3>
+                    <canvas id="perf-dept-chart"></canvas>
+                </div>
+                 <div class="card">
+                    <h3 style="margin-top:0;">Equipment Distribution</h3>
+                    <canvas id="equip-dist-chart"></canvas>
+                </div>
+                <div class="card">
+                    <h3 style="margin-top:0;">Faculty to Student Ratio</h3>
+                    <canvas id="faculty-ratio-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Faculty -->
+        <div class="tab-panel fade-in hidden" id="panel-faculty">
+            <h2 style="font-family:'Poppins'; margin-top:0;">Faculty Workload</h2>
+            <div class="card">
+                <table class="data-table">
+                    <thead><tr><th>Faculty Name</th><th>Department</th><th>Classes Taught</th><th>Reports Graded</th></tr></thead>
+                    <tbody id="faculty-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Approvals -->
+        <div class="tab-panel fade-in hidden" id="panel-approvals">
+            <h2 style="font-family:'Poppins'; margin-top:0;">Approvals Queue</h2>
+            <div class="card">
+                <table class="data-table">
+                    <thead><tr><th>Request ID</th><th>Type</th><th>Department</th><th>Amount/Item</th><th>Submitted By</th><th>Actions</th></tr></thead>
+                    <tbody id="approvals-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports -->
+        <div class="tab-panel fade-in hidden" id="panel-reports">
+            <h2 style="font-family:'Poppins'; margin-top:0;">Generate Institutional Reports</h2>
+            <div class="card">
+                <p class="kv">Select a report to generate and download for accreditation or review.</p>
+                <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="generateReport('annual')">Full Annual Report (PDF)</button>
+                    <button class="btn btn-ghost" onclick="generateReport('budget')">Budget Summary (CSV)</button>
+                    <button class="btn btn-ghost" onclick="generateReport('utilization')">Resource Utilization (CSV)</button>
+                    <button class="btn btn-ghost" onclick="generateReport('faculty')">Faculty Workload (CSV)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="tab-panel fade-in hidden" id="panel-settings">
+          <h2 style="font-family:'Poppins'; margin-top:0;">Settings</h2>
+          <div class="card">
+            <div class="setting-group">
+                <h3>Theme</h3>
+                <button id="themeToggle" class="btn btn-ghost">Toggle Light/Dark Mode</button>
+            </div>
+            <div class="setting-group">
+                <h3>Email Notifications</h3>
+                <label class="kv"><input type="checkbox" checked> Weekly Summary Report</label><br>
+                <label class="kv"><input type="checkbox" checked> Urgent Approval Requests</label>
+            </div>
+             <div class="setting-group">
+                <h3>Data Refresh Interval</h3>
+                <select class="form-control" style="width:auto;">
+                    <option>Every 1 hour</option>
+                    <option selected>Every 4 hours</option>
+                    <option>Daily</option>
+                </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+(function() {
+    'use strict';
+    /* =========================
+       MOCK DATA
+       ========================= */
+    const departments = [
+        { id: 'ECE', name: 'Electronics & Comm.', budget: 500000, expenditure: 450000, avgPerf: 88, utilization: 85, facultyCount: 10, studentCount: 150 },
+        { id: 'CS', name: 'Computer Science', budget: 700000, expenditure: 620000, avgPerf: 91, utilization: 92, facultyCount: 12, studentCount: 200 },
+        { id: 'ME', name: 'Mechanical Eng.', budget: 400000, expenditure: 380000, avgPerf: 85, utilization: 78, facultyCount: 9, studentCount: 140 },
+        { id: 'EE', name: 'Electrical Eng.', budget: 450000, expenditure: 400000, avgPerf: 86, utilization: 81, facultyCount: 8, studentCount: 130 },
+        { id: 'CV', name: 'Civil Eng.', budget: 350000, expenditure: 300000, avgPerf: 84, utilization: 75, facultyCount: 7, studentCount: 120 },
+        { id: 'IT', name: 'Information Tech.', budget: 600000, expenditure: 550000, avgPerf: 90, utilization: 89, facultyCount: 11, studentCount: 180 },
+        { id: 'BM', name: 'Biomedical Eng.', budget: 480000, expenditure: 420000, avgPerf: 87, utilization: 80, facultyCount: 6, studentCount: 90 }
+    ];
+
+    const faculty = [
+        { name: 'Dr. Priya Sharma', dept: 'ECE', classes: 4, reportsGraded: 45 },
+        { name: 'Dr. Rohan Verma', dept: 'CS', classes: 3, reportsGraded: 52 },
+        { name: 'Dr. Anjali Singh', dept: 'ME', classes: 5, reportsGraded: 38 },
+        { name: 'Dr. Sameer Khan', dept: 'EE', classes: 4, reportsGraded: 41 },
+        { name: 'Dr. Neha Gupta', dept: 'CV', classes: 4, reportsGraded: 35 },
+        { name: 'Dr. Vikram Rathod', dept: 'IT', classes: 3, reportsGraded: 48 },
+        { name: 'Dr. Sunita Rao', dept: 'BM', classes: 4, reportsGraded: 40 },
+        { name: 'Dr. Alok Nath', dept: 'CS', classes: 4, reportsGraded: 55 },
+        { name: 'Dr. Meera Desai', dept: 'ECE', classes: 5, reportsGraded: 42 },
+        { name: 'Dr. Rajeev Kumar', dept: 'ME', classes: 4, reportsGraded: 39 }
+    ];
+    
+    const equipmentDistribution = {
+        'Measurement': 25,
+        'Computing': 40,
+        'Mechanical': 20,
+        'Power Systems': 15,
+        'Software Licenses': 30,
+        'Biomedical': 18
+    };
+
+    const approvals = [
+        { id: 'REQ-001', type: 'Budget Increase', dept: 'CS', amount: '₹50,000', by: 'Dr. Verma' },
+        { id: 'REQ-002', type: 'New Equipment', dept: 'ECE', amount: '10x Oscilloscopes', by: 'Dr. Sharma' },
+        { id: 'REQ-003', type: 'Software License', dept: 'ME', amount: 'AutoCAD Renewal', by: 'Dr. Singh' },
+        { id: 'REQ-004', type: 'Lab Renovation', dept: 'CV', amount: '₹2,50,000', by: 'Dr. Gupta' },
+        { id: 'REQ-005', type: 'New Equipment', dept: 'BM', amount: 'ECG Machine', by: 'Dr. Rao' },
+        { id: 'REQ-006', type: 'Hiring Request', dept: 'IT', amount: '2x Lab Assistants', by: 'Dr. Rathod' },
+        { id: 'REQ-007', type: 'Conference Grant', dept: 'CS', amount: 'IEEE Conference', by: 'Dr. Nath' },
+        { id: 'REQ-008', type: 'New Equipment', dept: 'ME', amount: '3D Printer', by: 'Dr. Kumar' }
+    ];
+
+    // Chart instances
+    let utilizationChart, budgetChart, perfDeptChart, equipDistChart, facultyRatioChart;
+
+    /* =========================
+       INITIALIZATION & THEME
+       ========================= */
+    function init() {
+        setupTheme();
+        renderAll();
+    }
+
+    function setupTheme() {
+        const themeToggle = document.getElementById('themeToggle');
+        const applyTheme = (theme) => {
+            document.documentElement.classList.toggle('light', theme === 'light');
+        };
+        applyTheme(localStorage.getItem('smartlab-theme'));
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.classList.toggle('light');
+            localStorage.setItem('smartlab-theme', isLight ? 'light' : 'dark');
+        });
+    }
+
+    /* =========================
+       RENDERING FUNCTIONS
+       ========================= */
+    function renderAll() {
+        renderKPIs();
+        renderFaculty();
+        renderApprovals();
+        renderCharts();
+    }
+
+    function renderKPIs() {
+        const totalUtilization = departments.reduce((sum, d) => sum + d.utilization, 0) / departments.length;
+        document.getElementById('kpi-utilization').textContent = `${totalUtilization.toFixed(1)}%`;
+        document.getElementById('kpi-equipment-value').textContent = '₹2.5 Cr'; // Updated Mock
+        const avgPerf = departments.reduce((sum, d) => sum + d.avgPerf, 0) / departments.length;
+        document.getElementById('kpi-student-perf').textContent = `${avgPerf.toFixed(1)}%`;
+        document.getElementById('kpi-pending-approvals').textContent = approvals.length;
+    }
+
+    function renderFaculty() {
+        const tbody = document.getElementById('faculty-tbody');
+        tbody.innerHTML = '';
+        faculty.forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${f.name}</td><td>${f.dept}</td><td>${f.classes}</td><td>${f.reportsGraded}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderApprovals() {
+        const tbody = document.getElementById('approvals-tbody');
+        tbody.innerHTML = '';
+        approvals.forEach(a => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${a.id}</td>
+                <td>${a.type}</td>
+                <td>${a.dept}</td>
+                <td>${a.amount}</td>
+                <td>${a.by}</td>
+                <td>
+                    <button class="btn btn-approve" onclick="alert('Approved ${a.id}')"><i class="fa-solid fa-check"></i></button>
+                    <button class="btn btn-reject" onclick="alert('Rejected ${a.id}')"><i class="fa-solid fa-times"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+    
+    /* =========================
+       CHART RENDERING
+       ========================= */
+    function renderCharts() {
+        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+        const glassColor = getComputedStyle(document.documentElement).getPropertyValue('--glass').trim();
+        
+        // Utilization Chart
+        const utilCtx = document.getElementById('utilization-chart').getContext('2d');
+        if(utilizationChart) utilizationChart.destroy();
+        utilizationChart = new Chart(utilCtx, {
+            type: 'bar',
+            data: {
+                labels: departments.map(d => d.name),
+                datasets: [{
+                    label: 'Utilization %',
+                    data: departments.map(d => d.utilization),
+                    backgroundColor: 'rgba(79, 140, 255, 0.6)',
+                    borderColor: 'var(--accent-blue)',
+                    borderWidth: 1
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true, max: 100, ticks: {color: textColor}, grid: {color: glassColor} }, x: { ticks: {color: textColor}, grid: {color: glassColor} } }, plugins: { legend: { display: false } } }
+        });
+
+        // Budget Chart
+        const budgetCtx = document.getElementById('budget-chart').getContext('2d');
+        if(budgetChart) budgetChart.destroy();
+        budgetChart = new Chart(budgetCtx, {
+            type: 'bar',
+            data: {
+                labels: departments.map(d => d.name),
+                datasets: [
+                    { label: 'Budget', data: departments.map(d => d.budget), backgroundColor: 'rgba(52, 211, 153, 0.6)' },
+                    { label: 'Expenditure', data: departments.map(d => d.expenditure), backgroundColor: 'rgba(139, 92, 246, 0.6)' }
+                ]
+            },
+            options: { scales: { y: { ticks: {color: textColor}, grid: {color: glassColor} }, x: { ticks: {color: textColor}, grid: {color: glassColor} } }, plugins: { legend: { labels: { color: textColor } } } }
+        });
+
+        // Performance by Dept Chart
+        const perfCtx = document.getElementById('perf-dept-chart').getContext('2d');
+        if(perfDeptChart) perfDeptChart.destroy();
+        perfDeptChart = new Chart(perfCtx, {
+            type: 'line',
+            data: {
+                labels: departments.map(d => d.name),
+                datasets: [{
+                    label: 'Avg. Performance %',
+                    data: departments.map(d => d.avgPerf),
+                    borderColor: 'var(--accent-yellow)',
+                    backgroundColor: 'rgba(255, 209, 102, 0.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: { scales: { y: { beginAtZero: false, max: 100, ticks: {color: textColor}, grid: {color: glassColor} }, x: { ticks: {color: textColor}, grid: {color: glassColor} } }, plugins: { legend: { display: false } } }
+        });
+        
+        // Equipment Distribution Chart
+        const equipCtx = document.getElementById('equip-dist-chart').getContext('2d');
+        if(equipDistChart) equipDistChart.destroy();
+        equipDistChart = new Chart(equipCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(equipmentDistribution),
+                datasets: [{
+                    data: Object.values(equipmentDistribution),
+                    backgroundColor: ['#4f8cff', '#8b5cf6', '#34d399', '#ff6b6b', '#ffd166', '#f28a2e'],
+                    borderColor: 'var(--surface)',
+                    borderWidth: 4
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } }
+        });
+        
+        // Faculty Ratio Chart
+        const ratioCtx = document.getElementById('faculty-ratio-chart').getContext('2d');
+        if(facultyRatioChart) facultyRatioChart.destroy();
+        facultyRatioChart = new Chart(ratioCtx, {
+            type: 'radar',
+            data: {
+                labels: departments.map(d => d.name),
+                datasets: [{
+                    label: 'Students per Faculty',
+                    data: departments.map(d => d.studentCount / d.facultyCount),
+                    backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                    borderColor: 'var(--accent-red)',
+                    pointBackgroundColor: 'var(--accent-red)'
+                }]
+            },
+            options: { scales: { r: { beginAtZero: true, ticks: {color: textColor, backdropColor: 'transparent'}, grid: {color: glassColor}, angleLines: {color: glassColor} } }, plugins: { legend: { labels: { color: textColor } } } }
+        });
+    }
+
+    /* =========================
+       FUNCTIONAL REPORTS
+       ========================= */
+    window.generateReport = (type) => {
+        let data, filename;
+        switch(type) {
+            case 'budget':
+                data = departments;
+                filename = 'budget_summary.csv';
+                break;
+            case 'utilization':
+                data = departments.map(d => ({ department: d.name, utilization_percent: d.utilization }));
+                filename = 'utilization_report.csv';
+                break;
+            case 'faculty':
+                data = faculty;
+                filename = 'faculty_workload.csv';
+                break;
+            default:
+                alert('This report type is not available for CSV download.');
+                return;
+        }
+        
+        const headers = Object.keys(data[0]);
+        const csvRows = [
+            headers.join(','),
+            ...data.map(row => headers.map(header => JSON.stringify(row[header])).join(','))
+        ];
+        const csvString = csvRows.join('\n');
+        
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('hidden', '');
+        a.setAttribute('href', url);
+        a.setAttribute('download', filename);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    /* =========================
+       TAB NAVIGATION
+       ========================= */
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.setAttribute('aria-selected', 'false'));
+        btn.setAttribute('aria-selected', 'true');
+        document.querySelectorAll('.tab-panel').forEach(p => {
+            p.classList.toggle('hidden', p.id !== `panel-${btn.dataset.tab}`);
+            if (p.id === `panel-${btn.dataset.tab}`) {
+                setTimeout(() => p.classList.add('show'), 10);
+            } else {
+                p.classList.remove('show');
+            }
+        });
+    }));
+
+    // Initialize
+    init();
+})();
+</script>
+</body>
+</html>

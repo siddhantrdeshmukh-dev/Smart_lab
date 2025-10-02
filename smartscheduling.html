@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Lab — Smart Scheduling</title>
+
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <meta name="theme-color" content="#0b2340">
+  <style>
+/* =========================
+   THEME, RESET & UTILITIES
+   ========================= */
+:root{
+  --bg-900:#071021; --bg-800:#0b2540; --surface: #0f2b48; --muted:#98a6b3; --text:#eaf3ff;
+  --accent-blue:#4f8cff; --accent-purple:#8b5cf6; --accent-green:#34d399; --accent-red:#ff6b6b; --accent-yellow:#ffd166;
+  --glass: rgba(255,255,255,0.03); --radius:12px; --container:1600px; --ease: cubic-bezier(.2,.9,.3,1);
+}
+html.light{
+  --bg-900:#f7fbff; --bg-800:#eef6ff; --surface:#ffffff; --muted:#6b7280; --text:#0b2340; --glass: rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box}
+body{ margin:0; font-family:"Roboto",sans-serif; background:var(--bg-800); color:var(--text); line-height:1.45; }
+.container{ max-width:var(--container); margin:0 auto; padding:0 20px; }
+.kv{ color:var(--muted); font-size:13px; }
+.hidden{ display:none!important; }
+
+/* =========================
+   LAYOUT & HEADER
+   ========================= */
+.header{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; position:sticky; top:0; z-index:1200; backdrop-filter:blur(6px); background:linear-gradient(180deg,rgba(8,12,20,0.6),rgba(8,12,20,0.35)); border-bottom:1px solid var(--glass); }
+html.light .header{ background:linear-gradient(180deg,rgba(255,255,255,0.95),rgba(255,255,255,0.9)); border-bottom:1px solid rgba(0,0,0,0.06); }
+.brand{ display:flex; gap:12px; align-items:center; }
+.logo{ width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-purple),var(--accent-green)); color:#fff; font-weight:800; font-family:"Poppins"; }
+
+/* =========================
+   SHARED COMPONENTS
+   ========================= */
+.btn{ border:0; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
+.btn-primary{ background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple)); color:#fff; }
+.btn-ghost{ background:transparent; border:1px solid var(--glass); color:var(--text); }
+.card{ background:var(--surface); padding:18px; border-radius:var(--radius); border:1px solid var(--glass); box-shadow:0 12px 36px rgba(0,0,0,0.08); }
+.form-control{ width:100%; padding:10px; border-radius:8px; border:1px solid var(--glass); background:var(--bg-900); color:var(--text); font-family:inherit; }
+
+/* =========================
+   CALENDAR STYLES
+   ========================= */
+.calendar-container { padding: 20px 0; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.calendar-header h2 { margin: 0; font-family: 'Poppins', sans-serif; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+.calendar-day-header { font-weight: 700; text-align: center; padding-bottom: 10px; color: var(--muted); }
+.calendar-day { background: var(--surface); border: 1px solid var(--glass); border-radius: var(--radius); min-height: 120px; padding: 8px; transition: background 0.2s ease; }
+.calendar-day.other-month { background: transparent; border-color: transparent; }
+.calendar-day.today { border-color: var(--accent-yellow); }
+.day-number { text-align: right; font-weight: 700; margin-bottom: 4px; }
+.event { background: var(--accent-blue); color: white; padding: 4px 8px; border-radius: 6px; font-size: 12px; margin-bottom: 4px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event.lab { background: var(--accent-purple); }
+.event.lecture { background: var(--accent-green); }
+.event.activity { background: var(--accent-yellow); color: #000; }
+.event.holiday { background: var(--accent-red); }
+
+/* =========================
+   MODAL DIALOG
+   ========================= */
+.modal{ position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:2000; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 220ms var(--ease); }
+.modal.show{ opacity:1; pointer-events:auto; }
+.modal-content{ background:var(--bg-800); padding:24px; border-radius:var(--radius); width:100%; max-width:600px; box-shadow:0 20px 60px rgba(0,0,0,0.2); transform:scale(0.95); transition:transform 220ms var(--ease); }
+.modal.show .modal-content{ transform:scale(1); }
+.modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.modal-header h3{ margin:0; font-family:"Poppins"; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+#conflict-warning { color: var(--accent-red); font-weight: 700; display: none; }
+</style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header container">
+    <div class="brand">
+      <div class="logo">SL</div>
+      <div>
+        <div style="font-weight:700;">Smart Scheduling</div>
+        <div class="kv">Lab Booking System</div>
+      </div>
+    </div>
+    <div>
+        <button class="btn btn-primary" onclick="showBookingModal()"><i class="fa-solid fa-plus"></i> Book a Slot</button>
+        <button id="themeToggle" class="btn btn-ghost"><i class="fa-solid fa-moon"></i></button>
+    </div>
+  </header>
+
+  <!-- MAIN CALENDAR -->
+  <main class="container calendar-container">
+    <div class="calendar-header">
+        <button id="prev-month-btn" class="btn btn-ghost"><i class="fa-solid fa-chevron-left"></i></button>
+        <h2 id="calendar-month-year"></h2>
+        <button id="next-month-btn" class="btn btn-ghost"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+    <div class="calendar-grid" id="calendar-grid-headers"></div>
+    <div class="calendar-grid" id="calendar-grid-body"></div>
+  </main>
+
+  <!-- Booking Modal -->
+  <div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="bookingModalTitle">Book a Lab Session</h3>
+            <button class="btn btn-ghost" onclick="closeModal('bookingModal')">&times;</button>
+        </div>
+        <form id="bookingForm" onsubmit="handleBookingSubmit(event)">
+            <div class="form-grid">
+                <div><label>Class/Activity</label><input type="text" id="booking-title" class="form-control" required></div>
+                <div><label>Lab Room</label><select id="lab-select" class="form-control" required></select></div>
+                <div><label>Date</label><input type="date" id="booking-date" class="form-control" required></div>
+                <div><label>Time Slot</label><select id="time-slot-select" class="form-control" required></select></div>
+            </div>
+            <div id="conflict-warning" style="margin-top:16px;">
+                <i class="fa-solid fa-triangle-exclamation"></i> This slot is already booked in this lab.
+            </div>
+            <div style="text-align:right; margin-top:20px;">
+                <button type="submit" class="btn btn-primary">Check Availability & Book</button>
+            </div>
+        </form>
+    </div>
+  </div>
+
+  <!-- Event Detail Modal -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Session Details</h3>
+            <button class="btn btn-ghost" onclick="closeModal('detailModal')">&times;</button>
+        </div>
+        <div id="detail-modal-body"></div>
+    </div>
+  </div>
+
+<script>
+(function() {
+    'use strict';
+    /* =========================
+       MOCK DATA (from PDFs)
+       ========================= */
+    const labs = [
+        { id: 'R-102B', name: 'R-102B' },
+        { id: 'T-301A', name: 'T-301A' },
+        { id: 'R-102A', name: 'R-102A' },
+        { id: 'S-507', name: 'S-507' },
+        { id: 'S-502', name: 'S-502' },
+        { id: 'S-508', name: 'S-508' },
+        { id: 'R-302', name: 'R-302' },
+        { id: 'P-303', name: 'P-303' },
+        { id: 'S-503', name: 'S-503' },
+        { id: 'Ground/Gymkhana', name: 'Ground/Gymkhana' },
+        { id: 'Respective Labs', name: 'Respective Labs' }
+    ];
+
+    let schedule = [];
+    const timeSlots = ['09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00', '17:00-18:00'];
+    let calendarDate = new Date(2025, 6, 1); // July 2025
+
+    const weeklyPattern = {
+        1: [ // Monday
+            { title: 'DLOC V-DS Lab', labId: 'R-102B', timeSlot: '11:00-13:00', type: 'lab', faculty: 'Dr. RaviB' },
+            { title: 'DLOC VI-CSL Lab', labId: 'T-301A', timeSlot: '11:00-13:00', type: 'lab', faculty: 'SM' },
+            { title: 'PFM', labId: 'S-503', timeSlot: '14:00-15:00', type: 'lecture', faculty: 'Unknown' },
+            { title: 'DLOC VI-CSL', labId: 'S-503', timeSlot: '15:00-16:00', type: 'lecture', faculty: 'SM' }
+        ],
+        2: [ // Tuesday
+            { title: 'DLOC VI-CSL Lab', labId: 'T-301A', timeSlot: '11:00-13:00', type: 'lab', faculty: 'SM' },
+            { title: 'DLOC V-DL Lab', labId: 'R-102A', timeSlot: '11:00-13:00', type: 'lab', faculty: 'Sandra' },
+            { title: 'DLOC V-DL', labId: 'S-508', timeSlot: '14:00-15:00', type: 'lecture', faculty: 'Dr. MonikaB' },
+            { title: 'DLOC V-DS', labId: 'S-502', timeSlot: '14:00-15:00', type: 'lecture', faculty: 'Dr. RaviB' },
+            { title: 'ILOC-JMCS', labId: 'R-302', timeSlot: '15:00-17:00', type: 'lecture', faculty: 'Priyesh K' },
+            { title: 'ILOC-DBMDM', labId: 'P-303', timeSlot: '15:00-17:00', type: 'lecture', faculty: 'RAD' },
+            { title: 'ILOC-MIP', labId: 'R-502', timeSlot: '15:00-17:00', type: 'lecture', faculty: 'SDK' },
+            { title: 'ILOC Business Analytics', labId: 'S-502', timeSlot: '15:00-17:00', type: 'lecture', faculty: 'Unknown' }
+        ],
+        3: [ // Wednesday
+            { title: 'DLOC V-DL', labId: 'S-508', timeSlot: '10:00-12:00', type: 'lecture', faculty: 'Dr. MonikaB' },
+            { title: 'DLOC V-DS', labId: 'S-502', timeSlot: '10:00-12:00', type: 'lecture', faculty: 'Dr. RaviB' },
+            { title: 'DLOC VI-CSL', labId: 'S-508', timeSlot: '12:00-13:00', type: 'lecture', faculty: 'SM' }
+        ],
+        4: [ // Thursday
+            { title: 'DLOC VI-CSL', labId: 'S-508', timeSlot: '12:00-13:00', type: 'lecture', faculty: 'SM' },
+            { title: 'ECS Placement Activity', labId: 'S-507', timeSlot: '14:00-16:00', type: 'activity', faculty: 'PB' },
+            { title: 'ILOC-PE', labId: 'Ground/Gymkhana', timeSlot: '16:00-17:00', type: 'activity', faculty: 'Unknown' }
+        ],
+        5: [ // Friday
+            { title: 'ILOC-JMCS', labId: 'S-507', timeSlot: '10:00-11:00', type: 'lecture', faculty: 'Priyesh K' },
+            { title: 'ILOC-DBMDM', labId: 'S-502', timeSlot: '10:00-11:00', type: 'lecture', faculty: 'RAD' },
+            { title: 'ILOC-MIP', labId: 'S-502', timeSlot: '10:00-11:00', type: 'lecture', faculty: 'SDK' },
+            { title: 'PFM', labId: 'S-508', timeSlot: '10:00-11:00', type: 'lecture', faculty: 'Unknown' },
+            { title: 'Project B', labId: 'Respective Labs', timeSlot: '14:00-17:00', type: 'lab', faculty: 'Unknown' }
+        ]
+    };
+
+    const specialEvents = {
+        '2025-08-15': { title: 'Independence Day', type: 'holiday' },
+        '2025-08-16': { title: 'Gopal Kala', type: 'holiday' },
+        '2025-09-05': { title: 'Eid-E-Milad', type: 'holiday' },
+        '2025-09-11': { title: 'IA-I Exams', type: 'activity' },
+        '2025-09-12': { title: 'IA-I Exams', type: 'activity' },
+        '2025-09-13': { title: 'IA-I Exams', type: 'activity' },
+        '2025-09-19': { title: 'Hackathon', type: 'activity' },
+        '2025-09-20': { title: 'Hackathon', type: 'activity' },
+        '2025-10-02': { title: 'Gandhi Jayanti', type: 'holiday' },
+        '2025-10-20': { title: 'Diwali', type: 'holiday' },
+        '2025-10-21': { title: 'Diwali', type: 'holiday' },
+        '2025-10-22': { title: 'Diwali', type: 'holiday' },
+        '2025-10-23': { title: 'Diwali', type: 'holiday' },
+        '2025-10-27': { title: 'IA-II Exams', type: 'activity' },
+        '2025-10-28': { title: 'IA-II Exams', type: 'activity' },
+        '2025-10-29': { title: 'IA-II Exams', type: 'activity' },
+        '2025-11-05': { title: 'Guru Nanak Jayanti', type: 'holiday' },
+    };
+
+    function generateSchedule() {
+        let currentDate = new Date('2025-07-21T00:00:00');
+        const endDate = new Date('2025-11-30T00:00:00');
+        let eventIdCounter = 1;
+
+        while (currentDate <= endDate) {
+            const dateStr = currentDate.toISOString().slice(0, 10);
+            const dayOfWeek = currentDate.getDay();
+
+            const specialEvent = specialEvents[dateStr];
+            if (specialEvent) {
+                schedule.push({
+                    id: `SE${eventIdCounter++}`,
+                    title: specialEvent.title,
+                    labId: 'N/A',
+                    date: dateStr,
+                    timeSlot: 'All Day',
+                    type: specialEvent.type,
+                    faculty: 'N/A'
+                });
+            } else if (weeklyPattern[dayOfWeek]) {
+                weeklyPattern[dayOfWeek].forEach(eventTemplate => {
+                    schedule.push({
+                        ...eventTemplate,
+                        id: `E${eventIdCounter++}`,
+                        date: dateStr,
+                    });
+                });
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+    }
+
+    /* =========================
+       INITIALIZATION & THEME
+       ========================= */
+    function init() {
+        generateSchedule();
+        setupTheme();
+        populateSelectors();
+        renderCalendar();
+        setupEventListeners();
+    }
+
+    function setupTheme() {
+        const themeToggle = document.getElementById('themeToggle');
+        const applyTheme = (theme) => {
+            document.documentElement.classList.toggle('light', theme === 'light');
+        };
+        applyTheme(localStorage.getItem('smartlab-theme'));
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.classList.toggle('light');
+            localStorage.setItem('smartlab-theme', isLight ? 'light' : 'dark');
+        });
+    }
+
+    function setupEventListeners() {
+        document.getElementById('prev-month-btn').addEventListener('click', () => {
+            calendarDate.setMonth(calendarDate.getMonth() - 1);
+            renderCalendar();
+        });
+        document.getElementById('next-month-btn').addEventListener('click', () => {
+            calendarDate.setMonth(calendarDate.getMonth() + 1);
+            renderCalendar();
+        });
+        
+        ['lab-select', 'booking-date', 'time-slot-select'].forEach(id => {
+            document.getElementById(id).addEventListener('change', checkConflict);
+        });
+    }
+
+    /* =========================
+       RENDERING FUNCTIONS
+       ========================= */
+    function renderCalendar() {
+        const gridBody = document.getElementById('calendar-grid-body');
+        const monthYearEl = document.getElementById('calendar-month-year');
+        gridBody.innerHTML = '';
+        
+        const month = calendarDate.getMonth();
+        const year = calendarDate.getFullYear();
+        monthYearEl.textContent = `${calendarDate.toLocaleString('default', { month: 'long' })} ${year}`;
+        
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        const gridHeaders = document.getElementById('calendar-grid-headers');
+        if (gridHeaders.children.length === 0) {
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                gridHeaders.innerHTML += `<div class="calendar-day-header">${day}</div>`;
+            });
+        }
+
+        for (let i = 0; i < firstDay; i++) {
+            gridBody.innerHTML += `<div class="calendar-day other-month"></div>`;
+        }
+
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                dayEl.classList.add('today');
+            }
+            dayEl.innerHTML = `<div class="day-number">${day}</div>`;
+            
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const events = schedule.filter(s => s.date === dateStr);
+            
+            events.forEach(event => {
+                const eventEl = document.createElement('div');
+                eventEl.className = `event ${event.type}`;
+                eventEl.textContent = `${event.title} (${event.timeSlot.split('-')[0]})`;
+                eventEl.onclick = () => showDetailModal(event.id);
+                dayEl.appendChild(eventEl);
+            });
+            gridBody.appendChild(dayEl);
+        }
+    }
+
+    /* =========================
+       MODAL & FORM LOGIC
+       ========================= */
+    function populateSelectors() {
+        const labSelect = document.getElementById('lab-select');
+        const timeSelect = document.getElementById('time-slot-select');
+        
+        labs.forEach(l => labSelect.add(new Option(l.name, l.id)));
+        timeSlots.forEach(t => timeSelect.add(new Option(t, t)));
+    }
+
+    window.showBookingModal = () => {
+        document.getElementById('bookingForm').reset();
+        document.getElementById('conflict-warning').style.display = 'none';
+        document.getElementById('bookingModal').classList.add('show');
+    };
+    
+    window.showDetailModal = (eventId) => {
+        const event = schedule.find(e => e.id === eventId);
+        if (!event) return;
+        
+        const labInfo = labs.find(l => l.id === event.labId);
+        
+        const body = document.getElementById('detail-modal-body');
+        body.innerHTML = `
+            <p><strong>Event:</strong> ${event.title}</p>
+            <p><strong>Lab:</strong> ${labInfo ? labInfo.name : event.labId}</p>
+            <p><strong>Date:</strong> ${event.date}</p>
+            <p><strong>Time:</strong> ${event.timeSlot}</p>
+            <p><strong>Faculty:</strong> ${event.faculty || 'N/A'}</p>
+        `;
+        document.getElementById('detailModal').classList.add('show');
+    };
+
+    window.closeModal = (id) => document.getElementById(id).classList.remove('show');
+    
+    function checkConflict() {
+        const labId = document.getElementById('lab-select').value;
+        const date = document.getElementById('booking-date').value;
+        const timeSlot = document.getElementById('time-slot-select').value;
+        const warning = document.getElementById('conflict-warning');
+
+        if (!labId || !date || !timeSlot) {
+            warning.style.display = 'none';
+            return false;
+        }
+
+        const conflict = schedule.some(event => 
+            event.labId === labId && event.date === date && event.timeSlot === timeSlot
+        );
+        
+        warning.style.display = conflict ? 'block' : 'none';
+        return conflict;
+    }
+
+    window.handleBookingSubmit = (event) => {
+        event.preventDefault();
+        if (checkConflict()) {
+            alert('Cannot book a slot that is already occupied.');
+            return;
+        }
+
+        const newEvent = {
+            id: `E${String(schedule.length + 1).padStart(3, '0')}`,
+            title: document.getElementById('booking-title').value,
+            labId: document.getElementById('lab-select').value,
+            date: document.getElementById('booking-date').value,
+            timeSlot: document.getElementById('time-slot-select').value,
+            type: 'lecture' // Default type for new bookings
+        };
+        
+        schedule.push(newEvent);
+        schedule.sort((a, b) => new Date(a.date) - new Date(b.date)); // Keep schedule sorted
+        renderCalendar();
+        closeModal('bookingModal');
+        alert('Lab session booked successfully!');
+    };
+
+    // Initialize
+    init();
+})();
+</script>
+</body>
+</html>
